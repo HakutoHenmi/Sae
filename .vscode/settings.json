@@ -1,0 +1,66 @@
+﻿{
+  "project-actions.workspaceActions": [
+    {
+      "text": "▶ Run (Debug)",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\build_and_run.ps1 -Configuration Debug",
+      "color": "terminal.ansiGreen",
+      "tooltip": "Build and Run Debug Configuration"
+    },
+    {
+      "text": "▶ Run (Dev)",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\build_and_run.ps1 -Configuration Development",
+      "color": "terminal.ansiYellow",
+      "tooltip": "Build and Run Development Configuration"
+    },
+    {
+      "text": "▶ Run (Release)",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\build_and_run.ps1 -Configuration Release",
+      "color": "terminal.ansiRed",
+      "tooltip": "Build and Run Release Configuration"
+    },
+    {
+      "text": "🗑️ Clean",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\clean_build.ps1 -Configuration Debug",
+      "color": "terminal.ansiMagenta",
+      "tooltip": "Clean and Build Debug Configuration"
+    },
+    {
+      "text": "🪣 Format",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\format_code.ps1",
+      "color": "terminal.ansiCyan",
+      "tooltip": "Run Code Formatter"
+    }
+  ],
+  "project-actions.globalActions": [
+    {
+      "text": "▶ Run (Debug)",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\build_and_run.ps1 -Configuration Debug",
+      "color": "terminal.ansiGreen",
+      "tooltip": "Build and Run Debug Configuration"
+    },
+    {
+      "text": "▶ Run (Dev)",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\build_and_run.ps1 -Configuration Development",
+      "color": "terminal.ansiYellow",
+      "tooltip": "Build and Run Development Configuration"
+    },
+    {
+      "text": "▶ Run (Release)",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\build_and_run.ps1 -Configuration Release",
+      "color": "terminal.ansiRed",
+      "tooltip": "Build and Run Release Configuration"
+    },
+    {
+      "text": "🗑️ Clean",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\clean_build.ps1 -Configuration Debug",
+      "color": "terminal.ansiMagenta",
+      "tooltip": "Clean and Build Debug Configuration"
+    },
+    {
+      "text": "🪣 Format",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts\\build\\format_code.ps1",
+      "color": "terminal.ansiCyan",
+      "tooltip": "Run Code Formatter"
+    }
+  ]
+}

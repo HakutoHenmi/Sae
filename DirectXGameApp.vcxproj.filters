@@ -1,0 +1,1271 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Game\Editor\EditorUI.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Systems\UISystem.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\BaseScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\BulletScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\EnemyAIScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\KamikazeEnemyScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\PlayerScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\ScriptEngine.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\TowerScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\main.cpp" />
+    <ClCompile Include="Game\Scripts\EnemyBehavior.cpp" />
+    <ClCompile Include="Game\Scripts\Canon.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\PipeScript.cpp" />
+    <ClCompile Include="Game\Scripts\PreparationCamera.cpp" />
+    <ClCompile Include="Game\Scripts\EnemySpawnerScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\ExperienceHopper.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\ExperienceMiner.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\ExperienceOrbScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\PhaseSystemScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\IScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scripts\CommunicationTestScript.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scenes\SelectScene.cpp" />
+    <ClCompile Include="Game\Scenes\ResultScene.cpp" />
+    <ClCompile Include="Game\Scripts\BulletTank.cpp" />
+    <ClCompile Include="Game\Scripts\SkillTree.cpp" />
+    <ClCompile Include="Game\Scripts\InstallationButton.cpp" />
+    <ClCompile Include="Game\EnemySystem\NavigationManager.cpp" />
+    <ClCompile Include="Game\Scripts\HitDistortionScript.cpp" />
+    <ClCompile Include="Game\Scripts\PoisonTrap.cpp" />
+    <ClCompile Include="Game\Scripts\PoisonAttackArea.cpp" />
+    <ClCompile Include="Game\Scripts\MissileBulletScript.cpp" />
+    <ClCompile Include="Game\Scripts\MissileCanonScript.cpp" />
+    <ClCompile Include="Game\Scripts\ExplosionAttackArea.cpp" />
+    <ClCompile Include="Game\Scripts\PhaseTransition.cpp" />
+    <ClCompile Include="Game\Scripts\WaveManagement.cpp" />
+    <ClCompile Include="Game\Scenes\MainScene.cpp">
+      <Filter>Game\Scenes</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game\Editor\EditorUI.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\ObjectTypes.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Systems\UISystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\BaseScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\BulletScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\EnemyAIScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\IScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\KamikazeEnemyScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\PlayerScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\ScriptEngine.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\TowerScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Systems\AudioSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Systems\CameraFollowSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Systems\CharacterMovementSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Systems\CleanupSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Systems\ISystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Systems\PhysicsSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Systems\ScriptSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\EnemyBehavior.h" />
+    <ClInclude Include="Game\Scripts\PipeScript.h" />
+    <ClInclude Include="Game\Scripts\PhaseSystemScript.h" />
+    <ClInclude Include="Game\Scripts\PreparationCamera.h" />
+    <ClInclude Include="Game\Scripts\EnemySpawnerScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\ExperienceHopper.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\ExperienceMiner.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\ExperienceOrbScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\CommunicationTestScript.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scripts\ScriptUtils.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scenes\SelectScene.h" />
+    <ClInclude Include="Game\Scenes\ResultScene.h" />
+    <ClInclude Include="Game\Scripts\BulletTank.h" />
+    <ClInclude Include="Game\Scripts\SkillTree.h" />
+    <ClInclude Include="Game\Scripts\InstallationButton.h" />
+    <ClInclude Include="Game\EnemySystem\NavigationManager.h" />
+    <ClInclude Include="Game\Scripts\HitDistortionScript.h" />
+    <ClInclude Include="Game\Scripts\PoisonTrap.h" />
+    <ClInclude Include="Game\Scripts\PoisonAttackArea.h" />
+    <ClInclude Include="Game\Scripts\MissileBulletScript.h" />
+    <ClInclude Include="Game\Scripts\MissileCanonScript.h" />
+    <ClInclude Include="Game\Scripts\ExplosionAttackArea.h" />
+    <ClInclude Include="Game\Scripts\PhaseTransition.h" />
+    <ClInclude Include="Game\Scripts\WaveManagement.h" />
+    <ClInclude Include="Game\Scenes\MainScene.h">
+      <Filter>Game\Scenes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{7ac21cff-d91d-48e7-a50c-697bdfea681d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{d55df288-ae2c-4ba6-a365-b2bd0b0bf70a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{ee71b5c8-f3af-4fc9-a7fd-53443e145be0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Systems">
+      <UniqueIdentifier>{f2a3b4c5-d6e7-48a9-b0c1-d2e3f4a5b6c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripts">
+      <UniqueIdentifier>{2183f610-6b59-423a-95bc-4fff8159e64c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{0C6206DD-38E9-428C-B895-F9F9CC655C2E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\cube">
+      <UniqueIdentifier>{60DD2838-D809-47C4-B33A-D2C0218A43BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Editor">
+      <UniqueIdentifier>{67A972C9-4F93-4F50-B9CC-2243A116C364}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Editor\Icons">
+      <UniqueIdentifier>{2AA233A9-7831-43DD-8E8C-CFF88C4E460B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models">
+      <UniqueIdentifier>{3F00063F-14B3-4824-BA11-DA859CD555E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\3Dmodel">
+      <UniqueIdentifier>{4F96F685-2DD7-4A33-80EE-F0E34468F93F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\3Dmodel\cannon">
+      <UniqueIdentifier>{8CF66F7B-90FE-4D63-AD1A-A3CB17A8DACA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\axis">
+      <UniqueIdentifier>{973E737E-C27E-40A9-9660-ECFABAB20FB5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Boss">
+      <UniqueIdentifier>{4D0CA3A5-9876-4B07-A938-100B0DD86F01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\cube">
+      <UniqueIdentifier>{9F39FAB1-29A6-4443-B020-5EB7853FFC2F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Curve">
+      <UniqueIdentifier>{3E04FE98-7A97-48EE-89DD-061A26A08636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Cylinder">
+      <UniqueIdentifier>{693225C1-533B-4639-8DD0-81F04CD55698}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\FloorSide">
+      <UniqueIdentifier>{E414248F-A193-407A-98B2-29B5C732F223}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Gun">
+      <UniqueIdentifier>{C156544B-C208-4E47-8200-9630FC8AEDB7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Heart">
+      <UniqueIdentifier>{EA00AC70-3EA5-4D2A-942B-59A5A41D91B5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\parts">
+      <UniqueIdentifier>{9797A063-FF3D-4B72-BB1F-D32857EA6AEE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Plane">
+      <UniqueIdentifier>{E7E1A57F-25E5-49FB-9646-7A43CD6B502A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\player_ball">
+      <UniqueIdentifier>{7D5C58D7-D70D-4FF0-9B0C-923A5DAED346}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\seaweed">
+      <UniqueIdentifier>{711C208E-D0CB-4574-83AB-95E3F65EA950}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Signboard">
+      <UniqueIdentifier>{7BD28617-5D93-4227-9A84-4E9D34447523}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Signboard\Signboard">
+      <UniqueIdentifier>{B471867D-F348-41C2-903C-919E663D734A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\skydome">
+      <UniqueIdentifier>{49DE181E-DDA1-408E-90C6-DDE06F8A88D0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Stages">
+      <UniqueIdentifier>{D6F3AFB3-38BD-441E-A737-13FA220EF025}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Terrain">
+      <UniqueIdentifier>{CC72775D-E1E3-4544-8DA2-A942889301E2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\Terrain\LongFloor">
+      <UniqueIdentifier>{7A4B02E3-2D1B-49BC-B452-C5A966340F17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\TitleParts">
+      <UniqueIdentifier>{449B3CFD-801E-424A-83E2-CC5AD8FB6D01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\wall_cube">
+      <UniqueIdentifier>{DEAF3B86-98DA-4408-897F-64CC6C70B44D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Models\weapons">
+      <UniqueIdentifier>{7EFE20AE-23A3-432A-AB80-EFF20DA1AC51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Prefabs">
+      <UniqueIdentifier>{F9861FD1-245B-43C8-8222-6CE4BEE92FE9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Scenes">
+      <UniqueIdentifier>{3D05841D-F583-4685-8400-9A1F77348AD7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Scripts">
+      <UniqueIdentifier>{7CCD4E7E-9368-4EAF-89E7-D77A7C93DA5B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\shaders">
+      <UniqueIdentifier>{11649F97-95F0-4607-8271-6FA7767C2969}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Skills">
+      <UniqueIdentifier>{58F2E54B-1434-4B39-BED2-7521473FF87E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Sound">
+      <UniqueIdentifier>{3BAA3748-63C5-44BB-97D1-42BD1446490E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Textures">
+      <UniqueIdentifier>{509CA7E5-D22C-41F5-A648-F5B507F6D7B0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Textures\fonts">
+      <UniqueIdentifier>{94E95104-5676-4A38-B5C2-6DB22A11C07D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Textures\fonts\AppliMincho">
+      <UniqueIdentifier>{48002714-034B-46D5-812A-9F6A77A7B16E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Textures\fonts\Huninn">
+      <UniqueIdentifier>{F4DA2421-99E2-49D7-BD95-4CAC5CDECF6E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Textures\fonts\Kiwi_Maru">
+      <UniqueIdentifier>{D6F663B5-1BB0-44E6-AF48-CB83C8DCBC1A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Textures\Skybox">
+      <UniqueIdentifier>{16BCD9B5-EA58-4960-83BB-E751F31D85EC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Textures\UI">
+      <UniqueIdentifier>{43C8AB5C-4E09-4E15-9E32-09AE58066A74}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\level_data.csv">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resources\level_datakaeri.csv">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resources\cube\cube.jpg">
+      <Filter>Resources\cube</Filter>
+    </None>
+    <None Include="Resources\cube\cube.mtl">
+      <Filter>Resources\cube</Filter>
+    </None>
+    <None Include="Resources\cube\cube.obj">
+      <Filter>Resources\cube</Filter>
+    </None>
+    <None Include="Resources\cube\white1x1.png">
+      <Filter>Resources\cube</Filter>
+    </None>
+    <None Include="Resources\Editor\Icons\audio.png">
+      <Filter>Resources\Editor\Icons</Filter>
+    </None>
+    <None Include="Resources\Editor\Icons\file.png">
+      <Filter>Resources\Editor\Icons</Filter>
+    </None>
+    <None Include="Resources\Editor\Icons\folder.png">
+      <Filter>Resources\Editor\Icons</Filter>
+    </None>
+    <None Include="Resources\Editor\Icons\model.png">
+      <Filter>Resources\Editor\Icons</Filter>
+    </None>
+    <None Include="Resources\Editor\Icons\prefab.png">
+      <Filter>Resources\Editor\Icons</Filter>
+    </None>
+    <None Include="Resources\Editor\Icons\script.png">
+      <Filter>Resources\Editor\Icons</Filter>
+    </None>
+    <None Include="Resources\Models\canon.mtl">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\canon.obj">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\peak.mtl">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\peak.obj">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\plane.blend">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\plane.mtl">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\plane.obj">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\suzanne.mtl">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\suzanne.obj">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\sword.mtl">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\sword.obj">
+      <Filter>Resources\Models</Filter>
+    </None>
+    <None Include="Resources\Models\3Dmodel\cannon\cannon.mtl">
+      <Filter>Resources\Models\3Dmodel\cannon</Filter>
+    </None>
+    <None Include="Resources\Models\3Dmodel\cannon\cannon.obj">
+      <Filter>Resources\Models\3Dmodel\cannon</Filter>
+    </None>
+    <None Include="Resources\Models\3Dmodel\cannon\cannon.png">
+      <Filter>Resources\Models\3Dmodel\cannon</Filter>
+    </None>
+    <None Include="Resources\Models\axis\axis.jpg">
+      <Filter>Resources\Models\axis</Filter>
+    </None>
+    <None Include="Resources\Models\axis\axis.mtl">
+      <Filter>Resources\Models\axis</Filter>
+    </None>
+    <None Include="Resources\Models\axis\axis.obj">
+      <Filter>Resources\Models\axis</Filter>
+    </None>
+    <None Include="Resources\Models\Boss\bou.mtl">
+      <Filter>Resources\Models\Boss</Filter>
+    </None>
+    <None Include="Resources\Models\Boss\bou.obj">
+      <Filter>Resources\Models\Boss</Filter>
+    </None>
+    <None Include="Resources\Models\Boss\stone-wall-from-bricks-rock-game-background-in-cartoon-style-seamless-textured-surface-ui-game-asset-road-or-floor-material-illustration-vector.jpg">
+      <Filter>Resources\Models\Boss</Filter>
+    </None>
+    <None Include="Resources\Models\cube\cube.jpg">
+      <Filter>Resources\Models\cube</Filter>
+    </None>
+    <None Include="Resources\Models\cube\cube.mtl">
+      <Filter>Resources\Models\cube</Filter>
+    </None>
+    <None Include="Resources\Models\cube\cube.obj">
+      <Filter>Resources\Models\cube</Filter>
+    </None>
+    <None Include="Resources\Models\cube\white1x1.png">
+      <Filter>Resources\Models\cube</Filter>
+    </None>
+    <None Include="Resources\Models\Curve\Curve.mtl">
+      <Filter>Resources\Models\Curve</Filter>
+    </None>
+    <None Include="Resources\Models\Cylinder\cylinder.mtl">
+      <Filter>Resources\Models\Cylinder</Filter>
+    </None>
+    <None Include="Resources\Models\Cylinder\cylinder.obj">
+      <Filter>Resources\Models\Cylinder</Filter>
+    </None>
+    <None Include="Resources\Models\FloorSide\FloorSide.mtl">
+      <Filter>Resources\Models\FloorSide</Filter>
+    </None>
+    <None Include="Resources\Models\FloorSide\FloorSide.obj">
+      <Filter>Resources\Models\FloorSide</Filter>
+    </None>
+    <None Include="Resources\Models\Gun\Gun.mtl">
+      <Filter>Resources\Models\Gun</Filter>
+    </None>
+    <None Include="Resources\Models\Gun\Gun.obj">
+      <Filter>Resources\Models\Gun</Filter>
+    </None>
+    <None Include="Resources\Models\Gun\Gun.png">
+      <Filter>Resources\Models\Gun</Filter>
+    </None>
+    <None Include="Resources\Models\Heart\Heart.mtl">
+      <Filter>Resources\Models\Heart</Filter>
+    </None>
+    <None Include="Resources\Models\Heart\Heart.obj">
+      <Filter>Resources\Models\Heart</Filter>
+    </None>
+    <None Include="Resources\Models\Heart\Heart.png">
+      <Filter>Resources\Models\Heart</Filter>
+    </None>
+    <None Include="Resources\Models\parts\bou.mtl">
+      <Filter>Resources\Models\parts</Filter>
+    </None>
+    <None Include="Resources\Models\parts\bou.obj">
+      <Filter>Resources\Models\parts</Filter>
+    </None>
+    <None Include="Resources\Models\parts\cylinder.mtl">
+      <Filter>Resources\Models\parts</Filter>
+    </None>
+    <None Include="Resources\Models\parts\cylinder.obj">
+      <Filter>Resources\Models\parts</Filter>
+    </None>
+    <None Include="Resources\Models\parts\ki.mtl">
+      <Filter>Resources\Models\parts</Filter>
+    </None>
+    <None Include="Resources\Models\parts\ki.obj">
+      <Filter>Resources\Models\parts</Filter>
+    </None>
+    <None Include="Resources\Models\parts\ki.png">
+      <Filter>Resources\Models\parts</Filter>
+    </None>
+    <None Include="Resources\Models\parts\Ring.mtl">
+      <Filter>Resources\Models\parts</Filter>
+    </None>
+    <None Include="Resources\Models\parts\Ring.obj">
+      <Filter>Resources\Models\parts</Filter>
+    </None>
+    <None Include="Resources\Models\Plane\cube.mtl">
+      <Filter>Resources\Models\Plane</Filter>
+    </None>
+    <None Include="Resources\Models\Plane\cube.obj">
+      <Filter>Resources\Models\Plane</Filter>
+    </None>
+    <None Include="Resources\Models\Plane\cylinder.mtl">
+      <Filter>Resources\Models\Plane</Filter>
+    </None>
+    <None Include="Resources\Models\Plane\cylinder.obj">
+      <Filter>Resources\Models\Plane</Filter>
+    </None>
+    <None Include="Resources\Models\Plane\example.jpg">
+      <Filter>Resources\Models\Plane</Filter>
+    </None>
+    <None Include="Resources\Models\Plane\isi.jpg">
+      <Filter>Resources\Models\Plane</Filter>
+    </None>
+    <None Include="Resources\Models\Plane\leg.png">
+      <Filter>Resources\Models\Plane</Filter>
+    </None>
+    <None Include="Resources\Models\player_ball\ball.mtl">
+      <Filter>Resources\Models\player_ball</Filter>
+    </None>
+    <None Include="Resources\Models\player_ball\ball.obj">
+      <Filter>Resources\Models\player_ball</Filter>
+    </None>
+    <None Include="Resources\Models\seaweed\seaWeed.mtl">
+      <Filter>Resources\Models\seaweed</Filter>
+    </None>
+    <None Include="Resources\Models\seaweed\seaWeed.obj">
+      <Filter>Resources\Models\seaweed</Filter>
+    </None>
+    <None Include="Resources\Models\seaweed\seaweed.png">
+      <Filter>Resources\Models\seaweed</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Padjumpm.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard.mtl">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard.obj">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\SignboardB.mtl">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\SignboardB.obj">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\SignboardC.mtl">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\SignboardC.obj">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signBTop.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signBustRing.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signCOperate.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signFight.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\SignJumpPad.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signLevelUp.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signMovefloor.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signQR.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signSwitch.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signtamasan.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signThisIsSwitch.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\signTimeBlock.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Switch.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\tamasan.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\ThisIsSwitch.png">
+      <Filter>Resources\Models\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\Padjumpm.png">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\Signboard.mtl">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\Signboard.obj">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\SignboardB.mtl">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\SignboardB.obj">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\SignboardC.mtl">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\SignboardC.obj">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\Switch.png">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\tamasan.png">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\Signboard\ThisIsSwitch.png">
+      <Filter>Resources\Models\Signboard\Signboard</Filter>
+    </None>
+    <None Include="Resources\Models\skydome\skydome.mtl">
+      <Filter>Resources\Models\skydome</Filter>
+    </None>
+    <None Include="Resources\Models\skydome\skydome.obj">
+      <Filter>Resources\Models\skydome</Filter>
+    </None>
+    <None Include="Resources\Models\skydome\skydome.png">
+      <Filter>Resources\Models\skydome</Filter>
+    </None>
+    <None Include="Resources\Models\Stages\karimap.mtl">
+      <Filter>Resources\Models\Stages</Filter>
+    </None>
+    <None Include="Resources\Models\Stages\karimap.obj">
+      <Filter>Resources\Models\Stages</Filter>
+    </None>
+    <None Include="Resources\Models\Stages\kariMap2.mtl">
+      <Filter>Resources\Models\Stages</Filter>
+    </None>
+    <None Include="Resources\Models\Stages\kariMap2.obj">
+      <Filter>Resources\Models\Stages</Filter>
+    </None>
+    <None Include="Resources\Models\Stages\kariMap3.mtl">
+      <Filter>Resources\Models\Stages</Filter>
+    </None>
+    <None Include="Resources\Models\Stages\kariMap3.obj">
+      <Filter>Resources\Models\Stages</Filter>
+    </None>
+    <None Include="Resources\Models\Stages\Stage01.CSV">
+      <Filter>Resources\Models\Stages</Filter>
+    </None>
+    <None Include="Resources\Models\Stages\StageSample.json">
+      <Filter>Resources\Models\Stages</Filter>
+    </None>
+    <None Include="Resources\Models\Terrain\dirt.png">
+      <Filter>Resources\Models\Terrain</Filter>
+    </None>
+    <None Include="Resources\Models\Terrain\grass.png">
+      <Filter>Resources\Models\Terrain</Filter>
+    </None>
+    <None Include="Resources\Models\Terrain\rock.png">
+      <Filter>Resources\Models\Terrain</Filter>
+    </None>
+    <None Include="Resources\Models\Terrain\LongFloor\LongFloor.mtl">
+      <Filter>Resources\Models\Terrain\LongFloor</Filter>
+    </None>
+    <None Include="Resources\Models\Terrain\LongFloor\LongFloor.obj">
+      <Filter>Resources\Models\Terrain\LongFloor</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\0.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\0.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\1.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\1.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\10.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\10.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\2.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\2.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\3.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\3.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\4.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\4.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\5.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\5.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\6.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\6.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\7.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\7.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\8.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\8.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\9.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\9.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\kumo.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\kumo.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\peak.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\peak.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\siro.png">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\sky_sphere.png">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\title.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\title.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\title.png">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\title_futi.mtl">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\title_futi.obj">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\TitleParts\title_futi.png">
+      <Filter>Resources\Models\TitleParts</Filter>
+    </None>
+    <None Include="Resources\Models\wall_cube\Wall.mtl">
+      <Filter>Resources\Models\wall_cube</Filter>
+    </None>
+    <None Include="Resources\Models\wall_cube\Wall.obj">
+      <Filter>Resources\Models\wall_cube</Filter>
+    </None>
+    <None Include="Resources\Models\wall_cube\Wall.png">
+      <Filter>Resources\Models\wall_cube</Filter>
+    </None>
+    <None Include="Resources\Models\weapons\bukiUV.png">
+      <Filter>Resources\Models\weapons</Filter>
+    </None>
+    <None Include="Resources\Models\weapons\sword.mtl">
+      <Filter>Resources\Models\weapons</Filter>
+    </None>
+    <None Include="Resources\Models\weapons\sword.obj">
+      <Filter>Resources\Models\weapons</Filter>
+    </None>
+    <None Include="Resources\Prefabs\Base.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\BulletTank.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\Canon.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\EnemyCube.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\EnemySpawner1.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\EnemySpawner2.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\Model.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\Pipe.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\Player.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\Terrain.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Prefabs\UI.prefab">
+      <Filter>Resources\Prefabs</Filter>
+    </None>
+    <None Include="Resources\Scenes\.temp_play.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scenes\particle.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scenes\PhaseSystem.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scenes\player.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scenes\poro.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scenes\scene.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scenes\skills.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scenes\tesuto.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scenes\TowerScene.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scenes\TPS_Scene.json">
+      <Filter>Resources\Scenes</Filter>
+    </None>
+    <None Include="Resources\Scripts\bullet_logic.txt">
+      <Filter>Resources\Scripts</Filter>
+    </None>
+    <None Include="Resources\Scripts\enemy_ai.txt">
+      <Filter>Resources\Scripts</Filter>
+    </None>
+    <None Include="Resources\Scripts\player_control.txt">
+      <Filter>Resources\Scripts</Filter>
+    </None>
+    <None Include="Resources\shaders\AnimePostProcess.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\BoostRingPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\BoostRingVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\CollisionCompute.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\CRTPost.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\EnergyCylinderPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\EnergyCylinderVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\EnhancedTerrain.hlsli">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\EnhancedTerrainPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\EnhancedTerrainVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\FloorMV.PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\FloorMV.VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\Grass.hlsli">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\HeathazePS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\HeathazeVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\InstancedObjPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\InstancedObjVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\InstancedParticleVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\JumpPadEnergyPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\JumpPadEnergyVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\LiftPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\LiftVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\Obj.hlsli">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ObjPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ObjVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\OnOffObject3d.PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\OnOffObject3d.VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ParticlePS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ParticleVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\GPUParticleCS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\GPUParticleVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\GPUParticlePS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\PathMV_PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\PathMV_VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\PixelShaderUI.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\PostProcessCommon.hlsli">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\Primitive.hlsli">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\PrimitivePS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\PrimitiveVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\RiverPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\RiverVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\RockCommonVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\Rock_MidPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\Shape.hlsli">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ShapePS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ShapeSRGBOutputPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ShapeVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\Sprite.hlsli">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\SpritePS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\SpriteSRGBOutputPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\SpriteVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\StageCommonVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\StageHighPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\StageLowPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\StageMidPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\StylizedGrassPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\StylizedGrassVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\Terrain.hlsli">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\TerrainPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\TerrainVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\TimedBlockPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\TimedBlockVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ToonOutlinePS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ToonOutlineVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ToonPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ToonSkinningOutlineVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ToonSkinningVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\ToonVS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\VertexShaderUI.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\WallPS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\shaders\Water.hlsli">
+      <Filter>Resources\shaders</Filter>
+    </None>
+    <None Include="Resources\Skills\Power.png">
+      <Filter>Resources\Skills</Filter>
+    </None>
+    <None Include="Resources\Sound\BGM1.mp3">
+      <Filter>Resources\Sound</Filter>
+    </None>
+    <None Include="Resources\Sound\BGM2.mp3">
+      <Filter>Resources\Sound</Filter>
+    </None>
+    <None Include="Resources\Sound\bu-sutopaddo.mp3">
+      <Filter>Resources\Sound</Filter>
+    </None>
+    <None Include="Resources\Sound\idou.mp3">
+      <Filter>Resources\Sound</Filter>
+    </None>
+    <None Include="Resources\Sound\janpu.mp3">
+      <Filter>Resources\Sound</Filter>
+    </None>
+    <None Include="Resources\Sound\kettei.mp3">
+      <Filter>Resources\Sound</Filter>
+    </None>
+    <None Include="Resources\Sound\serekutosenntaku.mp3">
+      <Filter>Resources\Sound</Filter>
+    </None>
+    <None Include="Resources\Sound\suittikirikae.mp3">
+      <Filter>Resources\Sound</Filter>
+    </None>
+    <None Include="Resources\Textures\ball.png">
+      <Filter>Resources\Textures</Filter>
+    </None>
+    <None Include="Resources\Textures\basecolor.jpg">
+      <Filter>Resources\Textures</Filter>
+    </None>
+    <None Include="Resources\Textures\ki.png">
+      <Filter>Resources\Textures</Filter>
+    </None>
+    <None Include="Resources\Textures\PEAK.png">
+      <Filter>Resources\Textures</Filter>
+    </None>
+    <None Include="Resources\Textures\SignJumpPad.png">
+      <Filter>Resources\Textures</Filter>
+    </None>
+    <None Include="Resources\Textures\uvChecker.png">
+      <Filter>Resources\Textures</Filter>
+    </None>
+    <None Include="Resources\Textures\white1x1.png">
+      <Filter>Resources\Textures</Filter>
+    </None>
+    <None Include="Resources\Textures\fonts\AppliMincho\LICENSE_OFL.txt">
+      <Filter>Resources\Textures\fonts\AppliMincho</Filter>
+    </None>
+    <None Include="Resources\Textures\fonts\AppliMincho\ReadMe.txt">
+      <Filter>Resources\Textures\fonts\AppliMincho</Filter>
+    </None>
+    <None Include="Resources\Textures\fonts\Huninn\Huninn-Regular.ttf">
+      <Filter>Resources\Textures\fonts\Huninn</Filter>
+    </None>
+    <None Include="Resources\Textures\fonts\Huninn\OFL.txt">
+      <Filter>Resources\Textures\fonts\Huninn</Filter>
+    </None>
+    <None Include="Resources\Textures\fonts\Kiwi_Maru\KiwiMaru-Light.ttf">
+      <Filter>Resources\Textures\fonts\Kiwi_Maru</Filter>
+    </None>
+    <None Include="Resources\Textures\fonts\Kiwi_Maru\KiwiMaru-Medium.ttf">
+      <Filter>Resources\Textures\fonts\Kiwi_Maru</Filter>
+    </None>
+    <None Include="Resources\Textures\fonts\Kiwi_Maru\KiwiMaru-Regular.ttf">
+      <Filter>Resources\Textures\fonts\Kiwi_Maru</Filter>
+    </None>
+    <None Include="Resources\Textures\fonts\Kiwi_Maru\OFL.txt">
+      <Filter>Resources\Textures\fonts\Kiwi_Maru</Filter>
+    </None>
+    <None Include="Resources\Textures\Skybox\sky_negx.png">
+      <Filter>Resources\Textures\Skybox</Filter>
+    </None>
+    <None Include="Resources\Textures\Skybox\sky_negy.png">
+      <Filter>Resources\Textures\Skybox</Filter>
+    </None>
+    <None Include="Resources\Textures\Skybox\sky_negz.png">
+      <Filter>Resources\Textures\Skybox</Filter>
+    </None>
+    <None Include="Resources\Textures\Skybox\sky_posx.png">
+      <Filter>Resources\Textures\Skybox</Filter>
+    </None>
+    <None Include="Resources\Textures\Skybox\sky_posy.png">
+      <Filter>Resources\Textures\Skybox</Filter>
+    </None>
+    <None Include="Resources\Textures\Skybox\sky_posz.png">
+      <Filter>Resources\Textures\Skybox</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\0.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\1.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\2.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\3.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\4.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\5.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\6.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\7.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\8.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\9.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\doa.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\gameover.mtl">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\gameover.obj">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\ge-munimodoru.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\Gemini_Generated_Image_e2kgdce2kgdce2kg.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\hinto.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\hinto2.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\hinto3.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\hinto4.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\hinto5.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\kuria.mtl">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\kuria.obj">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\moji.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\moji2.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\PEAK.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\po-zu.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\Preparation.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\senntakuUI.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\serekutonimodoru.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\serekutoUI2.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\taitoru.mtl">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\taitoru.obj">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\taitorunimodoru.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Textures\UI\uvChecker.png">
+      <Filter>Resources\Textures\UI</Filter>
+    </None>
+    <None Include="Resources\Models\Signboard\邵ｺ阮呻ｽ檎ｸｺ繝ｻpng" />
+    <None Include="Resources\Models\Signboard\邵ｺ貅倪穐邵ｺ霈費ｽ・png" />
+    <None Include="Resources\Models\Signboard\邵ｺ・ｯ邵ｺ・ｭ郢ｧ荵晢ｽ・png" />
+    <None Include="Resources\Models\Signboard\郢ｧ・ｹ郢ｧ・､郢昴・繝｡.png" />
+    <None Include="Resources\shaders\TextVS.hlsl" />
+    <None Include="Resources\shaders\TextPS.hlsl" />
+    <None Include="Resources\shaders\Text.hlsli" />
+    <None Include="Resources\Textures\fonts\AppliMincho\郢ｧ・｢郢晏干ﾎ懆ｭ丞叙謔・otf" />
+    <None Include="Resources\Textures\fonts\AppliMincho\郢ｧ・｢郢晏干ﾎ懆ｭ丞叙謔グld.otf" />
+    <None Include="Resources\Textures\fonts\AppliMincho\郢ｧ・｢郢晏干ﾎ懆ｭ丞叙謔ザD.otf" />
+  </ItemGroup>
+</Project>

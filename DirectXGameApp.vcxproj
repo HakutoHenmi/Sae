@@ -1,0 +1,546 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Development|x64">
+      <Configuration>Development</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{87654321-4321-4321-4321-210987654321}</ProjectGuid>
+    <RootNamespace>DirectXGameApp</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\External\DirectXTex\include;$(ProjectDir)..\External\imgui;$(ProjectDir)..\External\KamataEngine\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\External\KamataEngine\lib\$(Configuration);$(ProjectDir)..\External\DirectXTex\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)..\Generated\Outputs\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\Generated\Obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\External\DirectXTex\include;$(ProjectDir)..\External\imgui;$(ProjectDir)..\External\KamataEngine\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\External\KamataEngine\lib\$(Configuration);$(ProjectDir)..\External\DirectXTex\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)..\Generated\Outputs\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\Generated\Obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\External\DirectXTex\include;$(ProjectDir)..\External\imgui;$(ProjectDir)..\External\KamataEngine\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\External\KamataEngine\lib\$(Configuration);$(ProjectDir)..\External\DirectXTex\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)..\Generated\Outputs\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\Generated\Obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex\DirectXTex;$(ProjectDir)externals\DirectXTex;$(SolutionDir)externals\DirectXTex\Include;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\imgui;$(ProjectDir)Engine;$(ProjectDir)Game;$(ProjectDir)Game\Scenes;$(ProjectDir)Game\Editor;$(ProjectDir)Engine\ThirdParty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4865 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)externals\assimp\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <PostBuildEvent>
+      <Command>set "OUT=$(SolutionDir)..\Generated\Outputs\$(Configuration)\Resources"
+if not exist "%OUT%" mkdir "%OUT%"
+robocopy "$(ProjectDir)Resources" "%OUT%" /E /NFL /NDL /NJH /NJS /NP /R:1 /W:1
+exit /b 0
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex\DirectXTex;$(ProjectDir)externals\DirectXTex;$(SolutionDir)externals\DirectXTex\Include;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\imgui;$(ProjectDir)Engine;$(ProjectDir)Game;$(ProjectDir)Game\Scenes;$(ProjectDir)Game\Editor;$(ProjectDir)Engine\ThirdParty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MinSpace</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4865 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)externals\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <PostBuildEvent>
+      <Command>set "OUT=$(SolutionDir)..\Generated\Outputs\$(Configuration)\Resources"
+if not exist "%OUT%" mkdir "%OUT%"
+robocopy "$(ProjectDir)Resources" "%OUT%" /E /NFL /NDL /NJH /NJS /NP /R:1 /W:1
+exit /b 0
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_WINDOWS;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex\DirectXTex;$(ProjectDir)externals\DirectXTex;$(SolutionDir)externals\DirectXTex\Include;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\imgui;$(ProjectDir)Engine;$(ProjectDir)Game;$(ProjectDir)Game\Scenes;$(ProjectDir)Game\Editor;$(ProjectDir)Engine\ThirdParty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 /wd4865 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)externals\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration />
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <PostBuildEvent>
+      <Command>set "OUT=$(SolutionDir)..\Generated\Outputs\$(Configuration)\Resources"
+if not exist "%OUT%" mkdir "%OUT%"
+robocopy "$(ProjectDir)Resources" "%OUT%" /E /NFL /NDL /NJH /NJS /NP /R:1 /W:1
+exit /b 0
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Game\Editor\EditorUI.cpp" />
+    <ClCompile Include="Game\main.cpp" />
+    <ClCompile Include="Game\Scripts\BaseScript.cpp" />
+    <ClCompile Include="Game\Scripts\ScriptEngine.cpp" />
+    <ClCompile Include="Game\Scripts\IScript.cpp" />
+    <ClCompile Include="Game\Systems\UISystem.cpp" />
+    <ClCompile Include="Game\Scenes\MainScene.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game\Editor\EditorUI.h" />
+    <ClInclude Include="Game\ObjectTypes.h" />
+    <ClInclude Include="Game\Scripts\BaseScript.h" />
+    <ClInclude Include="Game\Scripts\IScript.h" />
+    <ClInclude Include="Game\Scripts\ScriptEngine.h" />
+    <ClInclude Include="Game\Scripts\ScriptUtils.h" />
+    <ClInclude Include="Game\Systems\UISystem.h" />
+    <ClInclude Include="Game\Systems\ISystem.h" />
+    <ClInclude Include="Game\Systems\CharacterMovementSystem.h" />
+    <ClInclude Include="Game\Systems\CameraFollowSystem.h" />
+    <ClInclude Include="Game\Systems\PhysicsSystem.h" />
+    <ClInclude Include="Game\Systems\AudioSystem.h" />
+    <ClInclude Include="Game\Systems\ScriptSystem.h" />
+    <ClInclude Include="Game\Systems\CleanupSystem.h" />
+    <ClInclude Include="Game\Systems\MotionSystem.h" />
+    <ClInclude Include="Game\Scenes\MainScene.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\level_data.csv" />
+    <None Include="Resources\level_datakaeri.csv" />
+    <None Include="Resources\cube\cube.jpg" />
+    <None Include="Resources\cube\cube.mtl" />
+    <None Include="Resources\cube\cube.obj" />
+    <None Include="Resources\cube\white1x1.png" />
+    <None Include="Resources\Editor\Icons\audio.png" />
+    <None Include="Resources\Editor\Icons\file.png" />
+    <None Include="Resources\Editor\Icons\folder.png" />
+    <None Include="Resources\Editor\Icons\model.png" />
+    <None Include="Resources\Editor\Icons\prefab.png" />
+    <None Include="Resources\Editor\Icons\script.png" />
+    <None Include="Resources\Models\canon.mtl" />
+    <None Include="Resources\Models\canon.obj" />
+    <None Include="Resources\Models\peak.mtl" />
+    <None Include="Resources\Models\peak.obj" />
+    <None Include="Resources\Models\plane.blend" />
+    <None Include="Resources\Models\plane.mtl" />
+    <None Include="Resources\Models\plane.obj" />
+    <None Include="Resources\Models\suzanne.mtl" />
+    <None Include="Resources\Models\suzanne.obj" />
+    <None Include="Resources\Models\sword.mtl" />
+    <None Include="Resources\Models\sword.obj" />
+    <None Include="Resources\Models\3Dmodel\cannon\cannon.mtl" />
+    <None Include="Resources\Models\3Dmodel\cannon\cannon.obj" />
+    <None Include="Resources\Models\3Dmodel\cannon\cannon.png" />
+    <None Include="Resources\Models\axis\axis.jpg" />
+    <None Include="Resources\Models\axis\axis.mtl" />
+    <None Include="Resources\Models\axis\axis.obj" />
+    <None Include="Resources\Models\Boss\bou.mtl" />
+    <None Include="Resources\Models\Boss\bou.obj" />
+    <None Include="Resources\Models\Boss\stone-wall-from-bricks-rock-game-background-in-cartoon-style-seamless-textured-surface-ui-game-asset-road-or-floor-material-illustration-vector.jpg" />
+    <None Include="Resources\Models\cube\cube.jpg" />
+    <None Include="Resources\Models\cube\cube.mtl" />
+    <None Include="Resources\Models\cube\cube.obj" />
+    <None Include="Resources\Models\cube\white1x1.png" />
+    <None Include="Resources\Models\Curve\Curve.mtl" />
+    <None Include="Resources\Models\Cylinder\cylinder.mtl" />
+    <None Include="Resources\Models\Cylinder\cylinder.obj" />
+    <None Include="Resources\Models\FloorSide\FloorSide.mtl" />
+    <None Include="Resources\Models\FloorSide\FloorSide.obj" />
+    <None Include="Resources\Models\Gun\Gun.mtl" />
+    <None Include="Resources\Models\Gun\Gun.obj" />
+    <None Include="Resources\Models\Gun\Gun.png" />
+    <None Include="Resources\Models\Heart\Heart.mtl" />
+    <None Include="Resources\Models\Heart\Heart.obj" />
+    <None Include="Resources\Models\Heart\Heart.png" />
+    <None Include="Resources\Models\parts\bou.mtl" />
+    <None Include="Resources\Models\parts\bou.obj" />
+    <None Include="Resources\Models\parts\cylinder.mtl" />
+    <None Include="Resources\Models\parts\cylinder.obj" />
+    <None Include="Resources\Models\parts\ki.mtl" />
+    <None Include="Resources\Models\parts\ki.obj" />
+    <None Include="Resources\Models\parts\ki.png" />
+    <None Include="Resources\Models\parts\Ring.mtl" />
+    <None Include="Resources\Models\parts\Ring.obj" />
+    <None Include="Resources\Models\Plane\cube.mtl" />
+    <None Include="Resources\Models\Plane\cube.obj" />
+    <None Include="Resources\Models\Plane\cylinder.mtl" />
+    <None Include="Resources\Models\Plane\cylinder.obj" />
+    <None Include="Resources\Models\Plane\example.jpg" />
+    <None Include="Resources\Models\Plane\isi.jpg" />
+    <None Include="Resources\Models\Plane\leg.png" />
+    <None Include="Resources\Models\player_ball\ball.mtl" />
+    <None Include="Resources\Models\player_ball\ball.obj" />
+    <None Include="Resources\Models\seaweed\seaWeed.mtl" />
+    <None Include="Resources\Models\seaweed\seaWeed.obj" />
+    <None Include="Resources\Models\seaweed\seaweed.png" />
+    <None Include="Resources\Models\Signboard\Padjumpm.png" />
+    <None Include="Resources\Models\Signboard\Signboard.mtl" />
+    <None Include="Resources\Models\Signboard\Signboard.obj" />
+    <None Include="Resources\Models\Signboard\SignboardB.mtl" />
+    <None Include="Resources\Models\Signboard\SignboardB.obj" />
+    <None Include="Resources\Models\Signboard\SignboardC.mtl" />
+    <None Include="Resources\Models\Signboard\SignboardC.obj" />
+    <None Include="Resources\Models\Signboard\signBTop.png" />
+    <None Include="Resources\Models\Signboard\signBustRing.png" />
+    <None Include="Resources\Models\Signboard\signCOperate.png" />
+    <None Include="Resources\Models\Signboard\signFight.png" />
+    <None Include="Resources\Models\Signboard\SignJumpPad.png" />
+    <None Include="Resources\Models\Signboard\signLevelUp.png" />
+    <None Include="Resources\Models\Signboard\signMovefloor.png" />
+    <None Include="Resources\Models\Signboard\signQR.png" />
+    <None Include="Resources\Models\Signboard\signSwitch.png" />
+    <None Include="Resources\Models\Signboard\signtamasan.png" />
+    <None Include="Resources\Models\Signboard\signThisIsSwitch.png" />
+    <None Include="Resources\Models\Signboard\signTimeBlock.png" />
+    <None Include="Resources\Models\Signboard\Switch.png" />
+    <None Include="Resources\Models\Signboard\tamasan.png" />
+    <None Include="Resources\Models\Signboard\ThisIsSwitch.png" />
+    <None Include="Resources\Models\Signboard\邵ｺ阮呻ｽ檎ｸｺ繝ｻpng" />
+    <None Include="Resources\Models\Signboard\邵ｺ貅倪穐邵ｺ霈費ｽ・png" />
+    <None Include="Resources\Models\Signboard\邵ｺ・ｯ邵ｺ・ｭ郢ｧ荵晢ｽ・png" />
+    <None Include="Resources\Models\Signboard\郢ｧ・ｹ郢ｧ・､郢昴・繝｡.png" />
+    <None Include="Resources\Models\Signboard\Signboard\Padjumpm.png" />
+    <None Include="Resources\Models\Signboard\Signboard\Signboard.mtl" />
+    <None Include="Resources\Models\Signboard\Signboard\Signboard.obj" />
+    <None Include="Resources\Models\Signboard\Signboard\SignboardB.mtl" />
+    <None Include="Resources\Models\Signboard\Signboard\SignboardB.obj" />
+    <None Include="Resources\Models\Signboard\Signboard\SignboardC.mtl" />
+    <None Include="Resources\Models\Signboard\Signboard\SignboardC.obj" />
+    <None Include="Resources\Models\Signboard\Signboard\Switch.png" />
+    <None Include="Resources\Models\Signboard\Signboard\tamasan.png" />
+    <None Include="Resources\Models\Signboard\Signboard\ThisIsSwitch.png" />
+    <None Include="Resources\Models\skydome\skydome.mtl" />
+    <None Include="Resources\Models\skydome\skydome.obj" />
+    <None Include="Resources\Models\skydome\skydome.png" />
+    <None Include="Resources\Models\Stages\karimap.mtl" />
+    <None Include="Resources\Models\Stages\karimap.obj" />
+    <None Include="Resources\Models\Stages\kariMap2.mtl" />
+    <None Include="Resources\Models\Stages\kariMap2.obj" />
+    <None Include="Resources\Models\Stages\kariMap3.mtl" />
+    <None Include="Resources\Models\Stages\kariMap3.obj" />
+    <None Include="Resources\Models\Stages\Stage01.CSV" />
+    <None Include="Resources\Models\Stages\StageSample.json" />
+    <None Include="Resources\Models\Terrain\dirt.png" />
+    <None Include="Resources\Models\Terrain\grass.png" />
+    <None Include="Resources\Models\Terrain\rock.png" />
+    <None Include="Resources\Models\Terrain\LongFloor\LongFloor.mtl" />
+    <None Include="Resources\Models\Terrain\LongFloor\LongFloor.obj" />
+    <None Include="Resources\Models\TitleParts\0.mtl" />
+    <None Include="Resources\Models\TitleParts\0.obj" />
+    <None Include="Resources\Models\TitleParts\1.mtl" />
+    <None Include="Resources\Models\TitleParts\1.obj" />
+    <None Include="Resources\Models\TitleParts\10.mtl" />
+    <None Include="Resources\Models\TitleParts\10.obj" />
+    <None Include="Resources\Models\TitleParts\2.mtl" />
+    <None Include="Resources\Models\TitleParts\2.obj" />
+    <None Include="Resources\Models\TitleParts\3.mtl" />
+    <None Include="Resources\Models\TitleParts\3.obj" />
+    <None Include="Resources\Models\TitleParts\4.mtl" />
+    <None Include="Resources\Models\TitleParts\4.obj" />
+    <None Include="Resources\Models\TitleParts\5.mtl" />
+    <None Include="Resources\Models\TitleParts\5.obj" />
+    <None Include="Resources\Models\TitleParts\6.mtl" />
+    <None Include="Resources\Models\TitleParts\6.obj" />
+    <None Include="Resources\Models\TitleParts\7.mtl" />
+    <None Include="Resources\Models\TitleParts\7.obj" />
+    <None Include="Resources\Models\TitleParts\8.mtl" />
+    <None Include="Resources\Models\TitleParts\8.obj" />
+    <None Include="Resources\Models\TitleParts\9.mtl" />
+    <None Include="Resources\Models\TitleParts\9.obj" />
+    <None Include="Resources\Models\TitleParts\kumo.mtl" />
+    <None Include="Resources\Models\TitleParts\kumo.obj" />
+    <None Include="Resources\Models\TitleParts\peak.mtl" />
+    <None Include="Resources\Models\TitleParts\peak.obj" />
+    <None Include="Resources\Models\TitleParts\siro.png" />
+    <None Include="Resources\Models\TitleParts\sky_sphere.png" />
+    <None Include="Resources\Models\TitleParts\title.mtl" />
+    <None Include="Resources\Models\TitleParts\title.obj" />
+    <None Include="Resources\Models\TitleParts\title.png" />
+    <None Include="Resources\Models\TitleParts\title_futi.mtl" />
+    <None Include="Resources\Models\TitleParts\title_futi.obj" />
+    <None Include="Resources\Models\TitleParts\title_futi.png" />
+    <None Include="Resources\Models\wall_cube\Wall.mtl" />
+    <None Include="Resources\Models\wall_cube\Wall.obj" />
+    <None Include="Resources\Models\wall_cube\Wall.png" />
+    <None Include="Resources\Models\weapons\bukiUV.png" />
+    <None Include="Resources\Models\weapons\sword.mtl" />
+    <None Include="Resources\Models\weapons\sword.obj" />
+    <None Include="Resources\Prefabs\Base.prefab" />
+    <None Include="Resources\Prefabs\BulletTank.prefab" />
+    <None Include="Resources\Prefabs\Canon.prefab" />
+    <None Include="Resources\Prefabs\EnemyCube.prefab" />
+    <None Include="Resources\Prefabs\EnemySpawner1.prefab" />
+    <None Include="Resources\Prefabs\EnemySpawner2.prefab" />
+    <None Include="Resources\Prefabs\Model.prefab" />
+    <None Include="Resources\Prefabs\Pipe.prefab" />
+    <None Include="Resources\Prefabs\Player.prefab" />
+    <None Include="Resources\Prefabs\Terrain.prefab" />
+    <None Include="Resources\Prefabs\UI.prefab" />
+    <None Include="Resources\Scenes\.temp_play.json" />
+    <None Include="Resources\Scenes\particle.json" />
+    <None Include="Resources\Scenes\PhaseSystem.json" />
+    <None Include="Resources\Scenes\player.json" />
+    <None Include="Resources\Scenes\poro.json" />
+    <None Include="Resources\Scenes\scene.json" />
+    <None Include="Resources\Scenes\skills.json" />
+    <None Include="Resources\Scenes\tesuto.json" />
+    <None Include="Resources\Scenes\TowerScene.json" />
+    <None Include="Resources\Scenes\TPS_Scene.json" />
+    <None Include="Resources\Scripts\bullet_logic.txt" />
+    <None Include="Resources\Scripts\enemy_ai.txt" />
+    <None Include="Resources\Scripts\player_control.txt" />
+    <None Include="Resources\shaders\AnimePostProcess.hlsl" />
+    <None Include="Resources\shaders\BoostRingPS.hlsl" />
+    <None Include="Resources\shaders\BoostRingVS.hlsl" />
+    <None Include="Resources\shaders\CollisionCompute.hlsl" />
+    <None Include="Resources\shaders\CRTPost.hlsl" />
+    <None Include="Resources\shaders\EnergyCylinderPS.hlsl" />
+    <None Include="Resources\shaders\EnergyCylinderVS.hlsl" />
+    <None Include="Resources\shaders\EnhancedTerrain.hlsli" />
+    <None Include="Resources\shaders\EnhancedTerrainPS.hlsl" />
+    <None Include="Resources\shaders\EnhancedTerrainVS.hlsl" />
+    <None Include="Resources\shaders\FloorMV.PS.hlsl" />
+    <None Include="Resources\shaders\FloorMV.VS.hlsl" />
+    <None Include="Resources\shaders\Grass.hlsli" />
+    <None Include="Resources\shaders\HeathazePS.hlsl" />
+    <None Include="Resources\shaders\HeathazeVS.hlsl" />
+    <None Include="Resources\shaders\InstancedObjPS.hlsl" />
+    <None Include="Resources\shaders\InstancedObjVS.hlsl" />
+    <None Include="Resources\shaders\InstancedParticleVS.hlsl" />
+    <None Include="Resources\shaders\JumpPadEnergyPS.hlsl" />
+    <None Include="Resources\shaders\JumpPadEnergyVS.hlsl" />
+    <None Include="Resources\shaders\LiftPS.hlsl" />
+    <None Include="Resources\shaders\LiftVS.hlsl" />
+    <None Include="Resources\shaders\Obj.hlsli" />
+    <None Include="Resources\shaders\ObjPS.hlsl" />
+    <None Include="Resources\shaders\ObjVS.hlsl" />
+    <None Include="Resources\shaders\TextVS.hlsl" />
+    <None Include="Resources\shaders\TextPS.hlsl" />
+    <None Include="Resources\shaders\Text.hlsli" />
+    <None Include="Resources\shaders\OnOffObject3d.PS.hlsl" />
+    <None Include="Resources\shaders\OnOffObject3d.VS.hlsl" />
+    <None Include="Resources\shaders\ParticlePS.hlsl" />
+    <None Include="Resources\shaders\ParticleVS.hlsl" />
+    <None Include="Resources\shaders\GPUParticleCS.hlsl" />
+    <None Include="Resources\shaders\GPUParticleVS.hlsl" />
+    <None Include="Resources\shaders\GPUParticlePS.hlsl" />
+    <None Include="Resources\shaders\PathMV_PS.hlsl" />
+    <None Include="Resources\shaders\PathMV_VS.hlsl" />
+    <None Include="Resources\shaders\PixelShaderUI.hlsl" />
+    <None Include="Resources\shaders\PostProcessCommon.hlsli" />
+    <None Include="Resources\shaders\Primitive.hlsli" />
+    <None Include="Resources\shaders\PrimitivePS.hlsl" />
+    <None Include="Resources\shaders\PrimitiveVS.hlsl" />
+    <None Include="Resources\shaders\RiverPS.hlsl" />
+    <None Include="Resources\shaders\RiverVS.hlsl" />
+    <None Include="Resources\shaders\RockCommonVS.hlsl" />
+    <None Include="Resources\shaders\Rock_MidPS.hlsl" />
+    <None Include="Resources\shaders\Shape.hlsli" />
+    <None Include="Resources\shaders\ShapePS.hlsl" />
+    <None Include="Resources\shaders\ShapeSRGBOutputPS.hlsl" />
+    <None Include="Resources\shaders\ShapeVS.hlsl" />
+    <None Include="Resources\shaders\Sprite.hlsli" />
+    <None Include="Resources\shaders\SpritePS.hlsl" />
+    <None Include="Resources\shaders\SpriteSRGBOutputPS.hlsl" />
+    <None Include="Resources\shaders\SpriteVS.hlsl" />
+    <None Include="Resources\shaders\StageCommonVS.hlsl" />
+    <None Include="Resources\shaders\StageHighPS.hlsl" />
+    <None Include="Resources\shaders\StageLowPS.hlsl" />
+    <None Include="Resources\shaders\StageMidPS.hlsl" />
+    <None Include="Resources\shaders\StylizedGrassPS.hlsl" />
+    <None Include="Resources\shaders\StylizedGrassVS.hlsl" />
+    <None Include="Resources\shaders\Terrain.hlsli" />
+    <None Include="Resources\shaders\TerrainPS.hlsl" />
+    <None Include="Resources\shaders\TerrainVS.hlsl" />
+    <None Include="Resources\shaders\TimedBlockPS.hlsl" />
+    <None Include="Resources\shaders\TimedBlockVS.hlsl" />
+    <None Include="Resources\shaders\ToonOutlinePS.hlsl" />
+    <None Include="Resources\shaders\ToonOutlineVS.hlsl" />
+    <None Include="Resources\shaders\ToonPS.hlsl" />
+    <None Include="Resources\shaders\ToonSkinningOutlineVS.hlsl" />
+    <None Include="Resources\shaders\ToonSkinningVS.hlsl" />
+    <None Include="Resources\shaders\ToonVS.hlsl" />
+    <None Include="Resources\shaders\VertexShaderUI.hlsl" />
+    <None Include="Resources\shaders\WallPS.hlsl" />
+    <None Include="Resources\shaders\Water.hlsli" />
+    <None Include="Resources\Skills\Power.png" />
+    <None Include="Resources\Sound\BGM1.mp3" />
+    <None Include="Resources\Sound\BGM2.mp3" />
+    <None Include="Resources\Sound\bu-sutopaddo.mp3" />
+    <None Include="Resources\Sound\idou.mp3" />
+    <None Include="Resources\Sound\janpu.mp3" />
+    <None Include="Resources\Sound\kettei.mp3" />
+    <None Include="Resources\Sound\serekutosenntaku.mp3" />
+    <None Include="Resources\Sound\suittikirikae.mp3" />
+    <None Include="Resources\Textures\ball.png" />
+    <None Include="Resources\Textures\basecolor.jpg" />
+    <None Include="Resources\Textures\ki.png" />
+    <None Include="Resources\Textures\PEAK.png" />
+    <None Include="Resources\Textures\SignJumpPad.png" />
+    <None Include="Resources\Textures\uvChecker.png" />
+    <None Include="Resources\Textures\white1x1.png" />
+    <None Include="Resources\Textures\fonts\AppliMincho\LICENSE_OFL.txt" />
+    <None Include="Resources\Textures\fonts\AppliMincho\ReadMe.txt" />
+    <None Include="Resources\Textures\fonts\AppliMincho\郢ｧ・｢郢晏干ﾎ懆ｭ丞叙謔・otf" />
+    <None Include="Resources\Textures\fonts\AppliMincho\郢ｧ・｢郢晏干ﾎ懆ｭ丞叙謔グld.otf" />
+    <None Include="Resources\Textures\fonts\AppliMincho\郢ｧ・｢郢晏干ﾎ懆ｭ丞叙謔ザD.otf" />
+    <None Include="Resources\Textures\fonts\Huninn\Huninn-Regular.ttf" />
+    <None Include="Resources\Textures\fonts\Huninn\OFL.txt" />
+    <None Include="Resources\Textures\fonts\Kiwi_Maru\KiwiMaru-Light.ttf" />
+    <None Include="Resources\Textures\fonts\Kiwi_Maru\KiwiMaru-Medium.ttf" />
+    <None Include="Resources\Textures\fonts\Kiwi_Maru\KiwiMaru-Regular.ttf" />
+    <None Include="Resources\Textures\fonts\Kiwi_Maru\OFL.txt" />
+    <None Include="Resources\Textures\Skybox\sky_negx.png" />
+    <None Include="Resources\Textures\Skybox\sky_negy.png" />
+    <None Include="Resources\Textures\Skybox\sky_negz.png" />
+    <None Include="Resources\Textures\Skybox\sky_posx.png" />
+    <None Include="Resources\Textures\Skybox\sky_posy.png" />
+    <None Include="Resources\Textures\Skybox\sky_posz.png" />
+    <None Include="Resources\Textures\UI\0.png" />
+    <None Include="Resources\Textures\UI\1.png" />
+    <None Include="Resources\Textures\UI\2.png" />
+    <None Include="Resources\Textures\UI\3.png" />
+    <None Include="Resources\Textures\UI\4.png" />
+    <None Include="Resources\Textures\UI\5.png" />
+    <None Include="Resources\Textures\UI\6.png" />
+    <None Include="Resources\Textures\UI\7.png" />
+    <None Include="Resources\Textures\UI\8.png" />
+    <None Include="Resources\Textures\UI\9.png" />
+    <None Include="Resources\Textures\UI\doa.png" />
+    <None Include="Resources\Textures\UI\gameover.mtl" />
+    <None Include="Resources\Textures\UI\gameover.obj" />
+    <None Include="Resources\Textures\UI\ge-munimodoru.png" />
+    <None Include="Resources\Textures\UI\Gemini_Generated_Image_e2kgdce2kgdce2kg.png" />
+    <None Include="Resources\Textures\UI\hinto.png" />
+    <None Include="Resources\Textures\UI\hinto2.png" />
+    <None Include="Resources\Textures\UI\hinto3.png" />
+    <None Include="Resources\Textures\UI\hinto4.png" />
+    <None Include="Resources\Textures\UI\hinto5.png" />
+    <None Include="Resources\Textures\UI\kuria.mtl" />
+    <None Include="Resources\Textures\UI\kuria.obj" />
+    <None Include="Resources\Textures\UI\moji.png" />
+    <None Include="Resources\Textures\UI\moji2.png" />
+    <None Include="Resources\Textures\UI\PEAK.png" />
+    <None Include="Resources\Textures\UI\po-zu.png" />
+    <None Include="Resources\Textures\UI\Preparation.png" />
+    <None Include="Resources\Textures\UI\senntakuUI.png" />
+    <None Include="Resources\Textures\UI\serekutonimodoru.png" />
+    <None Include="Resources\Textures\UI\serekutoUI2.png" />
+    <None Include="Resources\Textures\UI\taitoru.mtl" />
+    <None Include="Resources\Textures\UI\taitoru.obj" />
+    <None Include="Resources\Textures\UI\taitorunimodoru.png" />
+    <None Include="Resources\Textures\UI\uvChecker.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="DirectXGameEngine.vcxproj">
+      <Project>{12345678-ABCD-1234-EF00-111111111111}</Project>
+    </ProjectReference>
+    <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
+      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
