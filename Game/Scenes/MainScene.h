@@ -46,6 +46,10 @@ public:
     Engine::Matrix4x4 GetWorldMatrix(int /*index*/) const { Engine::Matrix4x4 m; return m; }
     void SyncTag(entt::entity /*e*/) {}
 
+    // データセーブ・ロード機能
+    void SaveData();
+    void LoadData();
+
 private:
     Engine::Camera camera_;
     Engine::WindowDX* dx_ = nullptr;
@@ -71,6 +75,11 @@ private:
     int transitionTimer_ = 0;
     bool nextMascotMode_ = true;
     uint32_t whiteTex_ = 0;
+    
+    // 設定アイコンテクスチャ
+    Engine::Renderer::TextureHandle gearTex_ = 0;
+    Engine::Renderer::TextureHandle roundedRectTex_ = 0;
+    Engine::Renderer::TextureHandle softCircleTex_ = 0;
 
     // ドラッグ・位置記憶用
     bool isDraggingWindow_ = false;
@@ -84,6 +93,8 @@ private:
         Engine::Vector4 color;
         float scale;
         float angle; // 表示用回転角
+        std::string customText; // ユーザーが入力した気持ち
+        float textAlpha = 1.0f; // テキストのフェードイン用アルファ
     };
 
     std::vector<Boid> boids_;
@@ -104,8 +115,55 @@ private:
     // --- フェーズ1: ポモドーロ機能用データ ---
     float pomodoroTimer_ = 0.0f;
     bool isPomodoroWork_ = true; // true: 25分(作業), false: 5分(休憩)
+    bool isPomodoroPaused_ = false; // 一時停止フラグ
+    float totalWorkTime_ = 0.0f;    // 今日の総作業時間(秒)
+    float hoverAlpha_ = 0.0f;       // ホバー時のUIの透明度（0.0〜1.0）
     float pomodoroTransition_ = 0.0f; // 0.0(作業色) 〜 1.0(休憩色)
     Engine::Vector4 currentColor_{ 1.0f, 1.0f, 1.0f, 1.0f };
+    
+    // 自作テキスト入力用バッファ
+    std::string inputBuffer_;
+    
+    // 保存用の気持ち（テキスト）ログ
+    std::vector<std::string> savedFeelings_;
+
+    // --- テーマ・設定用データ ---
+    struct ThemeColors {
+        Engine::Vector4 bgWork;
+        Engine::Vector4 bgRelax;
+        Engine::Vector4 uiWork;
+        Engine::Vector4 uiRelax;
+        std::string name;
+    };
+    std::vector<ThemeColors> themes_;
+    int currentThemeIndex_ = 0;
+    bool isSettingsOpen_ = false;
+
+    // --- インタラクションモード用データ ---
+    int interactionMode_ = 0; // 0: Repel, 1: Gravity, 2: Ripple, 3: Orbit
+    
+    // Ripple（波紋）モード用ステート
+    bool rippleActive_ = false;
+    float rippleRadius_ = 0.0f;
+    Engine::Vector3 ripplePos_{0.0f, 0.0f, 0.0f};
+    
+    // Wind（風）モード用ステート
+    float prevMx_ = 0.0f;
+    float prevMy_ = 0.0f;
+
+    // --- ポップコーン＆パチンコ・テキスト用データ ---
+    struct FallingChar {
+        std::string character; // 切り出した1文字（UTF-8）
+        Engine::Vector2 position;
+        Engine::Vector2 velocity;
+        float angle;
+        float angularVelocity;
+        Engine::Vector4 color;
+        float scale;
+        float life; // 画面外に落ちるか時間経過で消滅
+    };
+    std::vector<FallingChar> fallingChars_;
+    int popcornTimer_ = 0; // ポップコーンの弾ける間隔を制御
 };
 
 } // namespace Game
