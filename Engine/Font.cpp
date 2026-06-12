@@ -32,7 +32,18 @@ bool Font::Load(const std::string& filePath) {
 
 	// stb_truetype の初期化
 	fontInfo_ = new stbtt_fontinfo();
-	if (!stbtt_InitFont(fontInfo_, fontData_.data(), stbtt_GetFontOffsetForIndex(fontData_.data(), 0))) {
+	bool initialized = false;
+	// TTC(TrueType Collection)の場合、0番目のフォントが非互換でも他のインデックスなら読める場合がある
+	for (int i = 0; i < 10; ++i) {
+		int offset = stbtt_GetFontOffsetForIndex(fontData_.data(), i);
+		if (offset < 0) break; // これ以上フォントが含まれていない
+		if (stbtt_InitFont(fontInfo_, fontData_.data(), offset)) {
+			initialized = true;
+			break; // 成功したフォントを使用
+		}
+	}
+
+	if (!initialized) {
 		delete fontInfo_;
 		fontInfo_ = nullptr;
 		fontData_.clear();

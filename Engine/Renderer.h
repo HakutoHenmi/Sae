@@ -43,6 +43,7 @@ public:
 		Vector4 color{1, 1, 1, 1};
 		Vector4 uvScaleOffset{1.0f, 1.0f, 0.0f, 0.0f}; // ★追加: UVスケール・オフセット
 		int layer = 0; // ★追加: 描画レイヤー（大きいほど手前）
+		std::string shaderName = ""; // ★追加: カスタムシェーダー名
 	};
 
 	struct CollisionRequest {
@@ -311,8 +312,9 @@ public:
 		Vector4 color{1,1,1,1};
 		float rotationRad = 0.0f;
 		int layer = 0; // ★追加: 描画レイヤー
+		std::string shaderName = ""; // ★追加: カスタムシェーダー名
 
-		Sprite9SliceDesc() : x(0), y(0), w(64), h(64), left(0), right(0), top(0), bottom(0), rotationRad(0), layer(0) {}
+		Sprite9SliceDesc() : x(0), y(0), w(64), h(64), left(0), right(0), top(0), bottom(0), rotationRad(0), layer(0), shaderName("") {}
 	};
 	void DrawSprite(TextureHandle texH, const SpriteDesc& s);
 	void DrawSprite9Slice(TextureHandle texH, const Sprite9SliceDesc& s); // ★追加
@@ -323,15 +325,15 @@ public:
 	// x, y: スクリーン座標 (左上基準, ピクセル)
 	// scale: フォントのスケール (1.0 = デフォルトサイズ)
 	// color: 文字色 (RGBA)
-	void DrawString(const std::string& text, float x, float y, float scale = 1.0f, const Vector4& color = {1,1,1,1}, const std::string& fontPath = "C:\\Windows\\Fonts\\UDDigiKyokashoN-R.ttc");
+	void DrawString(const std::string& text, float x, float y, float scale = 1.0f, const Vector4& color = {1,1,1,1}, const std::string& fontPath = "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 	void FlushText(); // テキストの描画実行
 
 	// テキストシステムの初期化 (フォントファイルの読み込み)
 	bool InitTextSystem(const std::string& fontPath, float pixelHeight = 48.0f);
 
 	// テキスト描画の幅を事前計算 (レイアウト用)
-	float MeasureTextWidth(const std::string& text, float scale = 1.0f, const std::string& fontPath = "C:\\Windows\\Fonts\\UDDigiKyokashoN-R.ttc");
-	float GetTextLineHeight(float scale = 1.0f, const std::string& fontPath = "C:\\Windows\\Fonts\\UDDigiKyokashoN-R.ttc") const;
+	float MeasureTextWidth(const std::string& text, float scale = 1.0f, const std::string& fontPath = "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+	float GetTextLineHeight(float scale = 1.0f, const std::string& fontPath = "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf") const;
 
 	// ★追加: 3Dライン描画（エディタ用ギズモ・グリッドなど）
 	void DrawLine3D(const Vector3& p0, const Vector3& p1, const Vector4& color, bool xray = false);

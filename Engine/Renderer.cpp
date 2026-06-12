@@ -218,8 +218,8 @@ bool Renderer::Initialize(WindowDX* window) {
 	if (FAILED(dev_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, collisionAlloc_.Get(), nullptr, IID_PPV_ARGS(&collisionList_)))) return false;
 	collisionList_->Close(); // 最初は閉じておく
 
-	// テキストシステム初期化（丸みを帯びた美しいUDデジタル教科書体を使用）
-	InitTextSystem("C:\\Windows\\Fonts\\UDDigiKyokashoN-R.ttc", 64.0f);
+	// テキストシステム初期化（可愛いフォントを使用）
+	InitTextSystem("Resources/Textures/fonts/Huninn/Huninn-Regular.ttf", 64.0f);
 
 	// ★追加: デフォルトのプロシージャルSkybox生成（グラデーション空）
 	{
@@ -1600,6 +1600,27 @@ float4 main(VSIn v, uint instanceID : SV_InstanceID) : SV_POSITION {
 		pso.DSVFormat = DXGI_FORMAT_UNKNOWN;
 		if (FAILED(dev_->CreateGraphicsPipelineState(&pso, IID_PPV_ARGS(&pso2D_))))
 			return false;
+
+		// ★追加: GaussianUI シェーダー (完全なプロシージャル・ガウスぼかし円)
+		static const char* kPSGaussianUI =
+		    R"(Texture2D gTex : register(t0); SamplerState gSmp : register(s0); cbuffer CBSprite : register(b0) { float4x4 gMVP; float4 gColor; }; 
+float4 main(float4 svpos:SV_POSITION, float2 uv:TEXCOORD0) : SV_TARGET { 
+    float2 d = uv - 0.5;
+    float distSq = dot(d, d) * 4.0;
+    if (distSq > 1.0) discard;
+    float falloff = exp(-distSq * 6.0);
+    float edge = exp(-6.0);
+    falloff = saturate((falloff - edge) / (1.0 - edge));
+    return gTex.Sample(gSmp, uv) * gColor * float4(1, 1, 1, falloff); 
+})";
+		auto psGaussianUI = CompileShader(kPSGaussianUI, "main", "ps_5_0");
+		if (psGaussianUI) {
+			pso.PS = {psGaussianUI->GetBufferPointer(), psGaussianUI->GetBufferSize()};
+			Microsoft::WRL::ComPtr<ID3D12PipelineState> psoGaussianUI;
+			if (SUCCEEDED(dev_->CreateGraphicsPipelineState(&pso, IID_PPV_ARGS(&psoGaussianUI)))) {
+				pipelines_["GaussianUI"] = psoGaussianUI;
+			}
+		}
 	}
 
 	// ---------------------------------------------------------
@@ -2255,6 +2276,7 @@ void Renderer::DrawSprite9Slice(TextureHandle texH, const Sprite9SliceDesc& s) {
 			sd.rotationRad = s.rotationRad;
 			sd.uvScaleOffset = { u[col+1] - u[col], v[row+1] - v[row], u[col], v[row] };
 			sd.layer = s.layer; // ★追加: レイヤー引き継ぎ
+			sd.shaderName = s.shaderName; // シェーダーも引き継ぎ
 			DrawSprite(texH, sd);
 		}
 	}
@@ -2280,9 +2302,21 @@ void Renderer::FlushSprites() {
 	list_->RSSetScissorRects(1, &scissor_);
 	list_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	ID3D12PipelineState* currentPso = pso2D_.Get();
+
 	for (const auto& dc : spriteDrawCalls_) {
 		const auto& s = dc.desc;
 		auto texH = dc.tex;
+
+		// シェーダーの切り替え
+		ID3D12PipelineState* targetPso = pso2D_.Get();
+		if (!s.shaderName.empty() && pipelines_.count(s.shaderName)) {
+			targetPso = pipelines_[s.shaderName].Get();
+		}
+		if (currentPso != targetPso) {
+			list_->SetPipelineState(targetPso);
+			currentPso = targetPso;
+		}
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -2360,6 +2394,9 @@ void Renderer::FlushSprites() {
 		list_->SetGraphicsRootDescriptorTable(1, textures_[texH].srvGpu);
 		list_->DrawInstanced(6, 1, 0, 0);
 	}
+	
+	// ★追加: フラッシュ完了後はリストをクリアする
+	spriteDrawCalls_.clear();
 }
 
 // ★追加: テキスト描画システム
@@ -2372,8 +2409,9 @@ bool Renderer::InitTextSystem(const std::string& fontPath, float pixelHeight) {
 
 	auto cache = std::make_unique<DynamicGlyphCache>();
 	if (!cache->Initialize(this, actualPath, pixelHeight)) {
-		// 指定されたフォントが読めない場合は、OS標準のMSゴシックにフォールバック
-		actualPath = "C:\\Windows\\Fonts\\msgothic.ttc";
+		OutputDebugStringA(("[Renderer] Failed to load font: " + actualPath + "\n").c_str());
+		// 指定されたフォントが読めない場合はOS標準のメイリオにフォールバック
+		actualPath = "C:\\Windows\\Fonts\\meiryo.ttc";
 		if (!cache->Initialize(this, actualPath, pixelHeight)) {
 			return false; // それでもダメなら諦める
 		}
