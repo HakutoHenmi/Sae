@@ -14,6 +14,9 @@
 #include <chrono>
 #include <thread>
 
+extern std::string g_CharInputBuffer;
+extern std::string g_ImeCompositionString; // ★追加: IME変換中の文字列
+
 namespace Engine {
 
 class WindowDX final {
@@ -53,10 +56,8 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE SRV_CPU(int offset) const;
 	D3D12_CPU_DESCRIPTOR_HANDLE SRV_CPU_Master(int offset) const; // ★追加
 	D3D12_GPU_DESCRIPTOR_HANDLE SRV_GPU(int offset) const;
-
 	HWND GetHwnd() const { return hwnd_; }
-	void ToggleFullscreen();
-	bool IsFullscreen() const { return isFullscreen_; }
+	void SetSourceSize(uint32_t w, uint32_t h) { if (swap_) swap_->SetSourceSize(w, h); }
 
 private:
 	bool InitWindow_(HINSTANCE hInst, int cmdShow, HWND& outHwnd);
@@ -70,10 +71,6 @@ private:
 	HWND hwnd_ = nullptr;
 	HINSTANCE hInst_ = nullptr;
 	WNDCLASSEX wc_{};
-
-	bool isFullscreen_ = false;
-	RECT windowedRect_ = { 0, 0, (LONG)kW, (LONG)kH };
-	LONG windowedStyle_ = 0;
 
 	Microsoft::WRL::ComPtr<IDXGIFactory7> factory_;
 	Microsoft::WRL::ComPtr<ID3D12Device> dev_;

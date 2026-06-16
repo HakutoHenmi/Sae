@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "ISystem.h"
 #include "../../Engine/Renderer.h"
 #include "../ObjectTypes.h"
@@ -136,7 +136,7 @@ public:
         } else if (isLowHealth) {
             renderer->SetPostEffect("GaussianFilter");
         } else {
-            renderer->SetPostEffect("Rich");
+            renderer->SetPostEffect("OutlinePost");
         }
     }
 
