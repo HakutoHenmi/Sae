@@ -3806,4 +3806,26 @@ void Renderer::DrawSkybox() {
 	list_->DrawIndexedInstanced(skyboxIndexCount_, 1, 0, 0, 0);
 }
 
+void Renderer::GetTextureSize(TextureHandle handle, float& width, float& height) const {
+	width = 1.0f;
+	height = 1.0f;
+	if (handle == 0 || handle >= textures_.size() || !textures_[handle].res) {
+		return;
+	}
+	D3D12_RESOURCE_DESC desc = textures_[handle].res->GetDesc();
+	width = static_cast<float>(desc.Width);
+	height = static_cast<float>(desc.Height);
+}
+
+void Renderer::SetScissorRect(float x, float y, float w, float h) {
+	scissor_.left = static_cast<LONG>(x);
+	scissor_.top = static_cast<LONG>(y);
+	scissor_.right = static_cast<LONG>(x + w);
+	scissor_.bottom = static_cast<LONG>(y + h);
+}
+
+void Renderer::ResetScissorRect() {
+	scissor_ = CD3DX12_RECT(0, 0, LONG_MAX, LONG_MAX);
+}
+
 } // namespace Engine

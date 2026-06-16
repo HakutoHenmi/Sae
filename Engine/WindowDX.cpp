@@ -11,9 +11,16 @@
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "imm32.lib") // ★追加: IME操作用
+
+#include <imm.h> // ★追加: IME操作用
 
 // ImGuiのメッセージハンドラ
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+// グローバルスコープで実体を定義
+std::string g_CharInputBuffer;
+std::string g_ImeCompositionString; // ★追加: 変換中文字列
 
 namespace Engine {
 
@@ -22,10 +29,101 @@ std::string WindowDX::s_DropDirectory = "Resources";
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wp, lp)) {
-		return true;
+		// ImGuiに処理させた後も、文字入力だけは拾うため return はしない
 	}
 
 	switch (msg) {
+    case WM_IME_SETCONTEXT:
+        // アプリケーション側でインライン描画を行うため、OS標準のコンポジションウィンドウ（白いバー）を消す。
+        // ただし変換候補リスト（漢字のリスト）はOSに出させる。
+        lp &= ~ISC_SHOWUICOMPOSITIONWINDOW;
+        return DefWindowProc(hWnd, msg, wp, lp);
+
+    case WM_IME_STARTCOMPOSITION: {
+        HIMC hImc = ImmGetContext(hWnd);
+        if (hImc) {
+            // 白いバーを強制的に画面外に飛ばして消す
+            COMPOSITIONFORM cf = {};
+            cf.dwStyle = CFS_POINT;
+            cf.ptCurrentPos.x = -9999;
+            cf.ptCurrentPos.y = -9999;
+            ImmSetCompositionWindow(hImc, &cf);
+
+            // 変換候補リスト(CandidateWindow)の位置を入力バー付近に指定する
+            CANDIDATEFORM cdf = {};
+            cdf.dwIndex = 0;
+            cdf.dwStyle = CFS_CANDIDATEPOS;
+            cdf.ptCurrentPos.x = Engine::WindowDX::kW / 2 - 200;
+            cdf.ptCurrentPos.y = Engine::WindowDX::kH - 90;
+            ImmSetCandidateWindow(hImc, &cdf);
+
+            ImmReleaseContext(hWnd, hImc);
+        }
+        return DefWindowProc(hWnd, msg, wp, lp);
+    }
+
+    case WM_IME_COMPOSITION: {
+        HIMC hImc = ImmGetContext(hWnd);
+        if (hImc) {
+            // 確定文字列の取得（これで二重入力を防ぎ、確実に入力バッファへ渡す）
+            if (lp & GCS_RESULTSTR) {
+                LONG size = ImmGetCompositionStringW(hImc, GCS_RESULTSTR, NULL, 0);
+                if (size > 0) {
+                    std::wstring resStr(size / sizeof(wchar_t), L'\0');
+                    ImmGetCompositionStringW(hImc, GCS_RESULTSTR, &resStr[0], size);
+                    int utf8Size = WideCharToMultiByte(CP_UTF8, 0, resStr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    if (utf8Size > 0) {
+                        std::string utf8Buf(utf8Size, '\0');
+                        WideCharToMultiByte(CP_UTF8, 0, resStr.c_str(), -1, &utf8Buf[0], utf8Size, nullptr, nullptr);
+                        g_CharInputBuffer += utf8Buf.c_str(); // 確定した文字を入力バッファへ
+                    }
+                }
+            }
+
+            // 変換中文字列の取得
+            if (lp & GCS_COMPSTR) {
+                LONG size = ImmGetCompositionStringW(hImc, GCS_COMPSTR, NULL, 0);
+                if (size > 0) {
+                    std::wstring compStr(size / sizeof(wchar_t), L'\0');
+                    ImmGetCompositionStringW(hImc, GCS_COMPSTR, &compStr[0], size);
+                    
+                    int utf8Size = WideCharToMultiByte(CP_UTF8, 0, compStr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    if (utf8Size > 0) {
+                        std::string utf8Buf(utf8Size, '\0');
+                        WideCharToMultiByte(CP_UTF8, 0, compStr.c_str(), -1, &utf8Buf[0], utf8Size, nullptr, nullptr);
+                        g_ImeCompositionString = utf8Buf.c_str(); 
+                    }
+                } else {
+                    g_ImeCompositionString.clear();
+                }
+            } else {
+                g_ImeCompositionString.clear();
+            }
+            ImmReleaseContext(hWnd, hImc);
+        }
+        // GCS_RESULTSTRを自前で処理したので、OSにWM_CHARを発行させないために lp からフラグを消す
+        lp &= ~GCS_RESULTSTR;
+        return DefWindowProc(hWnd, msg, wp, lp);
+    }
+
+    case WM_IME_ENDCOMPOSITION:
+        g_ImeCompositionString.clear();
+        return DefWindowProc(hWnd, msg, wp, lp);
+
+    case WM_CHAR:
+        // GCS_RESULTSTRで日本語は処理済み。英語（ASCII）のみWM_CHARで受け取る
+        // wpが0x7F以下（ASCII）の場合のみ追加する。これで二重入力を完全に防止。
+        if (wp >= 0x20 && wp <= 0x7F) {
+            char c = (char)wp;
+            g_CharInputBuffer += c;
+        }
+        return DefWindowProc(hWnd, msg, wp, lp);
+
+	case WM_NCHITTEST: {
+		// WM_NCHITTESTの強制上書きを解除し、OS標準の操作（ドラッグやリサイズ）を許可する
+		return DefWindowProc(hWnd, msg, wp, lp);
+	}
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
@@ -101,6 +199,16 @@ bool WindowDX::Initialize(HINSTANCE hInst, int cmdShow, HWND& outHwnd) {
 	// 初回時刻を記録
 	lastFrameTime_ = std::chrono::steady_clock::now();
 
+	// 起動時から完全に隙間なくフルスクリーン（ボーダレス）にする
+	MONITORINFO mi = { sizeof(mi) };
+	if (GetMonitorInfo(MonitorFromWindow(hwnd_, MONITOR_DEFAULTTOPRIMARY), &mi)) {
+		SetWindowPos(hwnd_, HWND_TOP,
+			mi.rcMonitor.left, mi.rcMonitor.top,
+			mi.rcMonitor.right - mi.rcMonitor.left,
+			mi.rcMonitor.bottom - mi.rcMonitor.top,
+			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+	}
+
 	return true;
 }
 
@@ -161,38 +269,7 @@ void WindowDX::WaitGPU() {
 	}
 }
 
-void WindowDX::ToggleFullscreen() {
-	if (!hwnd_) return;
 
-	isFullscreen_ = !isFullscreen_;
-
-	if (isFullscreen_) {
-		// ウィンドウ情報をバックアップ
-		windowedStyle_ = GetWindowLong(hwnd_, GWL_STYLE);
-		GetWindowRect(hwnd_, &windowedRect_);
-
-		// ボーダレススタイルに変更
-		SetWindowLong(hwnd_, GWL_STYLE, windowedStyle_ & ~WS_OVERLAPPEDWINDOW);
-
-		// モニター情報を取得してリサイズ
-		MONITORINFO mi = { sizeof(mi) };
-		if (GetMonitorInfo(MonitorFromWindow(hwnd_, MONITOR_DEFAULTTOPRIMARY), &mi)) {
-			SetWindowPos(hwnd_, HWND_TOP,
-				mi.rcMonitor.left, mi.rcMonitor.top,
-				mi.rcMonitor.right - mi.rcMonitor.left,
-				mi.rcMonitor.bottom - mi.rcMonitor.top,
-				SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-		}
-	} else {
-		// 元のスタイルと座標に復元
-		SetWindowLong(hwnd_, GWL_STYLE, windowedStyle_);
-		SetWindowPos(hwnd_, NULL,
-			windowedRect_.left, windowedRect_.top,
-			windowedRect_.right - windowedRect_.left,
-			windowedRect_.bottom - windowedRect_.top,
-			SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-	}
-}
 
 void WindowDX::Shutdown() {
 	WaitGPU();
@@ -238,14 +315,18 @@ bool WindowDX::InitWindow_(HINSTANCE hInst, int cmdShow, HWND& outHwnd) {
 
 	RegisterClassEx(&wc_);
 
-	DWORD style = WS_POPUP;
-	DWORD exStyle = WS_EX_LAYERED | WS_EX_TOPMOST;
+	DWORD style = WS_POPUP; // 完全ボーダレス
+	DWORD exStyle = WS_EX_APPWINDOW;
 
 	RECT rc = {0, 0, (LONG)kW, (LONG)kH};
 	AdjustWindowRectEx(&rc, style, FALSE, exStyle);
 
-	// WS_POPUP では CW_USEDEFAULT が失敗する可能性があるため固定座標を指定
-	hwnd_ = CreateWindowExW(exStyle, wc_.lpszClassName, L"心穏やかな場所", style, 100, 100, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInst, nullptr);
+	// 初期作成時は画面中央付近に配置
+	int screenW = GetSystemMetrics(SM_CXSCREEN);
+	int screenH = GetSystemMetrics(SM_CYSCREEN);
+	int wx = (screenW - (rc.right - rc.left)) / 2;
+	int wy = (screenH - (rc.bottom - rc.top)) / 2;
+	hwnd_ = CreateWindowExW(exStyle, wc_.lpszClassName, L"心穏やかな場所", style, wx, wy, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInst, nullptr);
 
 	if (!hwnd_)
 		return false;
@@ -316,7 +397,7 @@ bool WindowDX::CreateSwapchain_() {
 	sd.BufferCount = kBackBufferCount;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED; // CreateSwapChainForHwndではUNSPECIFIEDである必要がある（DWMが自動で透過処理する）
-	sd.Scaling = DXGI_SCALING_NONE; 
+	sd.Scaling = DXGI_SCALING_STRETCH; 
 
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> sc;
 	if (FAILED(factory_->CreateSwapChainForHwnd(que_.Get(), hwnd_, &sd, nullptr, nullptr, &sc)))

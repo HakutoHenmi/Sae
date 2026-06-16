@@ -71,9 +71,7 @@ void App::Run() {
 		input_.Update();
 
 		// ★追加: フルスクリーン切り替え (F11 or Alt+Enter)
-		if (input_.Trigger(DIK_F11) || (input_.Down(DIK_LALT) && input_.Trigger(DIK_RETURN))) {
-			dx_.ToggleFullscreen();
-		}
+		// App.cpp側でのグローバルな切り替えは廃止し、MainScene側で制御する
 
 		// フレームタイムの計算
 		auto currentTime = std::chrono::high_resolution_clock::now();

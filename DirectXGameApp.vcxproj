@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -186,6 +186,8 @@ exit /b 0
     <ClCompile Include="Game\Scripts\IScript.cpp" />
     <ClCompile Include="Game\Systems\UISystem.cpp" />
     <ClCompile Include="Game\Scenes\MainScene.cpp" />
+    <ClCompile Include="Game\Systems\SMTCMonitor.cpp" />
+    <ClCompile Include="Game\Systems\AudioLoopbackCapture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Editor\EditorUI.h" />
@@ -204,6 +206,8 @@ exit /b 0
     <ClInclude Include="Game\Systems\CleanupSystem.h" />
     <ClInclude Include="Game\Systems\MotionSystem.h" />
     <ClInclude Include="Game\Scenes\MainScene.h" />
+    <ClInclude Include="Game\Systems\SMTCMonitor.h" />
+    <ClInclude Include="Game\Systems\AudioLoopbackCapture.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\level_data.csv" />

@@ -274,6 +274,9 @@ public:
 		if (handle < textures_.size()) return textures_[handle].srvGpu;
 		return D3D12_GPU_DESCRIPTOR_HANDLE{0};
 	}
+	void GetTextureSize(TextureHandle handle, float& width, float& height) const;
+	void SetScissorRect(float x, float y, float w, float h);
+	void ResetScissorRect();
 
 	// 通常メッシュ描画
 	void DrawMesh(MeshHandle mesh, TextureHandle texture, const Transform& transform, const Vector4& mulColor, const std::string& shaderName = "Default", float reflectivity = 0.0f, bool useCubemap = false);

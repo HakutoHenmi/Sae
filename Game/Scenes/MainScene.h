@@ -3,6 +3,8 @@
 #include "../../Engine/Camera.h"
 #include "../../Engine/Renderer.h"
 #include <memory>
+#include "Systems/SMTCMonitor.h"
+#include "Systems/AudioLoopbackCapture.h"
 #include <chrono>
 
 #include "../../Engine/EventSystem.h"
@@ -19,7 +21,7 @@ namespace Game {
 class MainScene : public Engine::IScene {
 public:
     MainScene() = default;
-    ~MainScene() override = default;
+    ~MainScene() override;
 
     void Initialize(Engine::WindowDX* dx, const Engine::SceneParameters& params) override;
     void Update() override;
@@ -88,13 +90,16 @@ private:
 
     // --- Boids (Stardust Swarm) 用データ ---
     struct Boid {
-        Engine::Vector3 position;
-        Engine::Vector3 velocity;
-        Engine::Vector4 color;
-        float scale;
-        float angle; // 表示用回転角
+        Engine::Vector3 position{0.0f, 0.0f, 0.0f};
+        Engine::Vector3 velocity{0.0f, 0.0f, 0.0f};
+        Engine::Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
+        float scale = 1.0f;
+        float angle = 0.0f; // 表示用回転角
         std::string customText; // ユーザーが入力した気持ち
         float textAlpha = 1.0f; // テキストのフェードイン用アルファ
+        float nodeAlpha = 1.0f; // ノード自体（と線）のフェードイン用アルファ
+        float freeTimer = 0.0f; // 弾き飛ばされて群れから自由になる時間
+        Engine::Vector3 baseGlobePos{0.0f, 0.0f, 0.0f}; // 天球儀モードでの基準位置 (正規化ベクトル)
     };
 
     std::vector<Boid> boids_;
@@ -118,11 +123,13 @@ private:
     bool isPomodoroPaused_ = false; // 一時停止フラグ
     float totalWorkTime_ = 0.0f;    // 今日の総作業時間(秒)
     float hoverAlpha_ = 0.0f;       // ホバー時のUIの透明度（0.0〜1.0）
+    float mascotFadeAlpha_ = 0.0f;  // マスコットモードUIのフェードイン用
     float pomodoroTransition_ = 0.0f; // 0.0(作業色) 〜 1.0(休憩色)
     Engine::Vector4 currentColor_{ 1.0f, 1.0f, 1.0f, 1.0f };
     
     // 自作テキスト入力用バッファ
     std::string inputBuffer_;
+    std::string currentAIWhisper_ = "『ここは あなたの心を休める場所です』";
     
     // 保存用の気持ち（テキスト）ログ
     std::vector<std::string> savedFeelings_;
@@ -138,10 +145,47 @@ private:
     std::vector<ThemeColors> themes_;
     int currentThemeIndex_ = 0;
     bool isSettingsOpen_ = false;
-
-    // --- インタラクションモード用データ ---
-    int interactionMode_ = 0; // 0: Repel, 1: Gravity, 2: Ripple, 3: Orbit
     
+    // --- 追加: 文字落下によるノード増加を制御するエネルギーゲージ ---
+    float stardustEnergy_ = 0.0f;
+    float healingWordCooldown_ = 0.0f; // 癒やしの言葉が湧く頻度を制限するタイマー
+    bool zenMode_ = false;
+
+    // --- モード管理 ---
+    int visualMode_ = 0; // 0: Constellation, 1: Celestial Globe, 2: Falling Blocks, 3: Blooming Tree
+    int interactionMode_ = 0; // 0: Repel, 1: Gravity, 2: Ripple, 3: Popcorn, 4: Slingshot
+    int currentShapeMode_ = 0; // 0: Square, 1: Circle, 2: Diamond, 3: Star
+    float treeZoom_ = 1.0f; // ツリーモードで画面に収めるためのカメラズーム率
+
+    // カスタムカラー
+    bool useCustomNodeColor_ = false;
+    Engine::Vector3 customNodeColor_{ 1.0f, 1.0f, 1.0f };
+    bool useCustomTextColor_ = false;
+    Engine::Vector3 customTextColor_{ 1.0f, 1.0f, 1.0f };
+    
+    // UIスクロールとアニメーション
+    float menuScrollY_ = 0.0f;
+    float settingsSlideOffset_ = 0.0f; // 0.0f(非表示) 〜 1.0f(表示)
+    
+    // 天球儀モード用データ
+    float globeRotX_ = 0.0f;
+    float globeRotY_ = 0.0f;
+    float globeVelX_ = 0.0f; // hand-spinner momentum X
+    float globeVelY_ = -0.0005f; // hand-spinner momentum Y (default slow rotation)
+    bool isGlobeDragging_ = false;
+    float globeLastMouseX_ = 0.0f;
+    float globeLastMouseY_ = 0.0f;
+    
+    // Gravityモード反発用ステート
+    bool prevGravityMouseDown_ = false;
+    float gravityExplosionTimer_ = 0.0f;
+    Engine::Vector3 gravityExplosionPos_{0.0f, 0.0f, 0.0f};
+
+    // Slingshotモード用ステート
+    int draggedBoidIndex_ = -1; // -1: 何も掴んでいない
+    Engine::Vector2 slingshotStartPos_{0.0f, 0.0f};
+    Engine::Vector2 slingshotCurrentPos_{0.0f, 0.0f};
+
     // Ripple（波紋）モード用ステート
     bool rippleActive_ = false;
     float rippleRadius_ = 0.0f;
@@ -154,16 +198,32 @@ private:
     // --- ポップコーン＆パチンコ・テキスト用データ ---
     struct FallingChar {
         std::string character; // 切り出した1文字（UTF-8）
-        Engine::Vector2 position;
-        Engine::Vector2 velocity;
-        float angle;
-        float angularVelocity;
-        Engine::Vector4 color;
-        float scale;
-        float life; // 画面外に落ちるか時間経過で消滅
+        Engine::Vector2 position{0.0f, 0.0f};
+        Engine::Vector2 velocity{0.0f, 0.0f};
+        float angle = 0.0f;
+        float angularVelocity = 0.0f;
+        Engine::Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
+        float scale = 1.0f;
+        float life = 0.0f; // 画面外に落ちるか時間経過で消滅
     };
     std::vector<FallingChar> fallingChars_;
     int popcornTimer_ = 0; // ポップコーンの弾ける間隔を制御
+
+    // --- 音楽連携（SMTC）用 ---
+    std::unique_ptr<SMTCMonitor> smtcMonitor_;
+    SMTCInfo currentMusicInfo_;
+    float musicNotificationAlpha_ = 0.0f;
+    float musicNotificationTimer_ = 0.0f;
+    Engine::Renderer::TextureHandle musicArtworkTex_ = 0;
+    std::unique_ptr<AudioLoopbackCapture> audioCapture_;
+    std::vector<float> audioSamples_;
+    std::vector<float> fftHeights_;
+
+    // --- サウンド用ハンドル ---
+    uint32_t soundSend_ = 0xFFFFFFFF;
+    uint32_t soundZen_ = 0xFFFFFFFF;
+    uint32_t soundFocus_ = 0xFFFFFFFF;
+    uint32_t soundHit_ = 0xFFFFFFFF;
 };
 
 } // namespace Game

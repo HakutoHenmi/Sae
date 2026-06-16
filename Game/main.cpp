@@ -1,10 +1,12 @@
-﻿#include "App.h"
+#include "App.h"
 #include "MainScene.h"
 #include <Windows.h>
 #include <memory>
+#include <winrt/Windows.Foundation.h>
 
 int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int cmdShow) {
 	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	winrt::init_apartment(winrt::apartment_type::multi_threaded);
 
 	// カレントディレクトリをexeの場所に設定
 	{
