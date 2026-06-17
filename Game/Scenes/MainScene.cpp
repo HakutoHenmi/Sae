@@ -20,7 +20,7 @@
 #include "../../Engine/ThirdParty/nlohmann/json.hpp"
 using json = nlohmann::json;
 
-#define APP_VERSION "Beta v0.1.1"
+#define APP_VERSION "Beta v0.1.2"
 
 namespace Game {
 
