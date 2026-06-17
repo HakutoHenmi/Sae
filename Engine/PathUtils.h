@@ -152,6 +152,12 @@ private:
                         rootPath = current;
                         return rootPath;
                     }
+                    // Check child "Sae" folder
+                    if (std::filesystem::exists(current / "Sae") && 
+                        (HasProjectFile(current / "Sae") || std::filesystem::exists(current / "Sae" / ".git"))) {
+                        rootPath = current / "Sae";
+                        return rootPath;
+                    }
                     // Check child "neo_Engine" folder
                     if (std::filesystem::exists(current / "neo_Engine") && 
                         (HasProjectFile(current / "neo_Engine") || std::filesystem::exists(current / "neo_Engine" / ".git"))) {

@@ -13,8 +13,14 @@
 #include <fstream>
 #include <complex>
 #include <cmath>
+#include <thread>
+#include <winhttp.h>
+#pragma comment(lib, "winhttp.lib")
+
 #include "../../Engine/ThirdParty/nlohmann/json.hpp"
 using json = nlohmann::json;
+
+#define APP_VERSION "Beta v0.1.0"
 
 namespace Game {
 
@@ -176,6 +182,9 @@ void MainScene::Initialize(Engine::WindowDX* dx, const Engine::SceneParameters& 
         soundFocus_ = audio->Load("Assets/Sounds/focus_finish.wav");
         soundHit_ = audio->Load("Assets/Sounds/hit.wav");
     }
+
+    // 起動時にアップデートを確認
+    CheckForUpdateInfo();
 }
 
 void MainScene::Update() {
@@ -194,13 +203,13 @@ void MainScene::Update() {
         if (isPomodoroWork_) {
             totalWorkTime_ += dt_;
         }
-        float targetDuration = isPomodoroWork_ ? (25.0f * 60.0f) : (5.0f * 60.0f);
+        float targetDuration = isPomodoroWork_ ? (pWorkDurationMinutes_ * 60.0f) : (pRelaxDurationMinutes_ * 60.0f);
         if (pomodoroTimer_ >= targetDuration) {
             pomodoroTimer_ = 0.0f; // 完全に0にリセットし、フレーム落ちによるループバックバグを防ぐ
             isPomodoroWork_ = !isPomodoroWork_;
             // セッション終了時（集中完了時）にセーブ
             SaveData();
-            if (Engine::Audio::GetInstance()) Engine::Audio::GetInstance()->Play(soundFocus_, false, 0.4f);
+            if (Engine::Audio::GetInstance()) Engine::Audio::GetInstance()->Play(soundFocus_, false, seVolume_);
         }
     }
 
@@ -452,8 +461,8 @@ void MainScene::Update() {
                 settingsSlideOffset_ += (0.0f - settingsSlideOffset_) * 0.15f;
             }
 
-            float panelW = 540.0f; 
-            float contentH = 1060.0f; // コンテンツ自体の高さを元の長さに戻す
+            float panelW = 620.0f; 
+            float contentH = 1900.0f; // コンテンツ自体の高さを拡張
             
             // 右寄せで表示するためのターゲットX座標
             float targetPanelX = Engine::WindowDX::kW - panelW;
@@ -464,39 +473,72 @@ void MainScene::Update() {
             if (isSettingsOpen_) {
                 float wheel = input->GetMouseWheelDelta();
                 if (wheel != 0.0f) {
-                    menuScrollY_ += wheel * 0.5f;
+                    menuScrollY_ += wheel * 30.0f;
                 }
-                float overflow = (contentH > Engine::WindowDX::kH) ? (contentH - Engine::WindowDX::kH) / 2.0f + 40.0f : 0.0f;
-                if (menuScrollY_ > overflow) menuScrollY_ = overflow;
-                if (menuScrollY_ < -overflow) menuScrollY_ = -overflow;
+                // 上下マージン50pxずつ考慮
+                float maxScroll = (contentH + 100.0f > (float)Engine::WindowDX::kH) ? (contentH + 100.0f - (float)Engine::WindowDX::kH) : 0.0f;
+                if (menuScrollY_ > 0.0f) menuScrollY_ = 0.0f;
+                if (menuScrollY_ < -maxScroll) menuScrollY_ = -maxScroll;
             }
-            float panelY = Engine::WindowDX::kH / 2.0f - contentH / 2.0f + menuScrollY_;
+            float panelY = menuScrollY_ + 50.0f;
 
             bool handledMouse = false;
             
             // スライダーのドラッグ判定
-            if (isSettingsOpen_ && input->IsMouseDown(0)) {
-                auto handleSlider = [&](float sx, float sy, float w, float h, float& val) {
-                    if (mx >= sx && mx <= sx + w && my >= sy - 10.0f && my <= sy + h + 10.0f) {
+            if (isSettingsOpen_) {
+                static int draggingSliderId = -1;
+                auto handleSlider = [&](int id, float sx, float sy, float w, float h, float& val) {
+                    if (input->IsMouseTrigger(0)) {
+                        if (mx >= sx - 15.0f && mx <= sx + w + 15.0f && my >= sy - 15.0f && my <= sy + h + 15.0f) {
+                            draggingSliderId = id;
+                        }
+                    }
+                    if (input->IsMouseDown(0) && draggingSliderId == id) {
                         val = (mx - sx) / w;
                         if (val < 0.0f) val = 0.0f;
                         if (val > 1.0f) val = 1.0f;
+                        if (val < 0.01f) val = 0.0f;
+                        if (val > 0.99f) val = 1.0f;
                         return true;
+                    }
+                    if (!input->IsMouseDown(0) && draggingSliderId == id) {
+                        draggingSliderId = -1;
                     }
                     return false;
                 };
                 
                 bool sliderChanged = false;
                 if (useCustomNodeColor_) {
-                    if (handleSlider(panelX + 220.0f, panelY + 840.0f, 250.0f, 15.0f, customNodeColor_.x)) sliderChanged = true;
-                    if (handleSlider(panelX + 220.0f, panelY + 870.0f, 250.0f, 15.0f, customNodeColor_.y)) sliderChanged = true;
-                    if (handleSlider(panelX + 220.0f, panelY + 900.0f, 250.0f, 15.0f, customNodeColor_.z)) sliderChanged = true;
+                    if (handleSlider(1, panelX + 140.0f, panelY + 940.0f, 110.0f, 15.0f, customNodeColor_.x)) sliderChanged = true;
+                    if (handleSlider(2, panelX + 140.0f, panelY + 980.0f, 110.0f, 15.0f, customNodeColor_.y)) sliderChanged = true;
+                    if (handleSlider(3, panelX + 140.0f, panelY + 1020.0f, 110.0f, 15.0f, customNodeColor_.z)) sliderChanged = true;
                 }
                 if (useCustomTextColor_) {
-                    if (handleSlider(panelX + 220.0f, panelY + 940.0f, 250.0f, 15.0f, customTextColor_.x)) sliderChanged = true;
-                    if (handleSlider(panelX + 220.0f, panelY + 970.0f, 250.0f, 15.0f, customTextColor_.y)) sliderChanged = true;
-                    if (handleSlider(panelX + 220.0f, panelY + 1000.0f, 250.0f, 15.0f, customTextColor_.z)) sliderChanged = true;
+                    if (handleSlider(4, panelX + 440.0f, panelY + 940.0f, 110.0f, 15.0f, customTextColor_.x)) sliderChanged = true;
+                    if (handleSlider(5, panelX + 440.0f, panelY + 980.0f, 110.0f, 15.0f, customTextColor_.y)) sliderChanged = true;
+                    if (handleSlider(6, panelX + 440.0f, panelY + 1020.0f, 110.0f, 15.0f, customTextColor_.z)) sliderChanged = true;
                 }
+
+                // ポモドーロWork時間 (10〜100分、1分刻み)
+                float workVal = (pWorkDurationMinutes_ - 10.0f) / 90.0f;
+                if (handleSlider(7, panelX + 40.0f, panelY + 1260.0f, 220.0f, 15.0f, workVal)) {
+                    pWorkDurationMinutes_ = 10.0f + workVal * 90.0f;
+                    sliderChanged = true;
+                }
+                // ポモドーロRelax時間 (1〜60分、1分刻み)
+                float relaxVal = (pRelaxDurationMinutes_ - 1.0f) / 59.0f;
+                if (handleSlider(8, panelX + 320.0f, panelY + 1260.0f, 220.0f, 15.0f, relaxVal)) {
+                    pRelaxDurationMinutes_ = 1.0f + relaxVal * 59.0f;
+                    sliderChanged = true;
+                }
+
+                // 音量 SE Vol
+                if (handleSlider(9, panelX + 130.0f, panelY + 1570.0f, 410.0f, 15.0f, seVolume_)) {
+                    auto* audio = Engine::Audio::GetInstance();
+                    if (audio) audio->SetMasterSEVolume(seVolume_);
+                    sliderChanged = true;
+                }
+
                 if (sliderChanged) {
                     handledMouse = true;
                     // 保存は頻繁に行うと重いかもしれないので一旦省略、離した時に保存するのが良いが...
@@ -605,7 +647,7 @@ void MainScene::Update() {
                     if (!handledMouse) {
                         for (int i = 0; i < 4; ++i) {
                             float sx = panelX + 50.0f + i * 110.0f;
-                            float sy = panelY + 680.0f; // さらに下にずらす
+                            float sy = panelY + 700.0f; // さらに下にずらす
                             if (mx >= sx && mx <= sx + 70.0f && my >= sy && my <= sy + 70.0f) {
                                 currentShapeMode_ = i;
                                 SaveData();
@@ -615,18 +657,99 @@ void MainScene::Update() {
                         }
                     }
                     
-                    // Custom Color Toggle のクリック判定
+                    // Custom Color & New Settings Toggle のクリック判定
                     if (!handledMouse) {
                         // Node Color Toggle
-                        if (mx >= panelX + 50.0f && mx <= panelX + 180.0f && my >= panelY + 840.0f && my <= panelY + 900.0f) {
+                        if (mx >= panelX + 20.0f && mx <= panelX + 290.0f && my >= panelY + 890.0f && my <= panelY + 915.0f) {
                             useCustomNodeColor_ = !useCustomNodeColor_;
                             SaveData();
                             handledMouse = true;
                         }
                         // Text Color Toggle
-                        else if (mx >= panelX + 50.0f && mx <= panelX + 180.0f && my >= panelY + 940.0f && my <= panelY + 1000.0f) {
+                        else if (mx >= panelX + 310.0f && mx <= panelX + 580.0f && my >= panelY + 890.0f && my <= panelY + 915.0f) {
                             useCustomTextColor_ = !useCustomTextColor_;
                             SaveData();
+                            handledMouse = true;
+                        }
+                        // Forced Break Toggle
+                        else if (mx >= panelX + 450.0f && mx <= panelX + 570.0f && my >= panelY + 1270.0f && my <= panelY + 1330.0f) {
+                            isForcedBreakMode_ = !isForcedBreakMode_;
+                            SaveData();
+                            handledMouse = true;
+                        }
+                        // Graphics Quality (Low: 0, Medium: 1, High: 2)
+                        else if (my >= panelY + 1490.0f && my <= panelY + 1530.0f) {
+                            if (mx >= panelX + 40.0f && mx <= panelX + 130.0f) {
+                                graphicsQuality_ = 0;
+                                boids_.resize(100);
+                                SaveData();
+                                handledMouse = true;
+                            } else if (mx >= panelX + 150.0f && mx <= panelX + 240.0f) {
+                                graphicsQuality_ = 1;
+                                int oldSize = (int)boids_.size();
+                                boids_.resize(200);
+                                if (oldSize < 200) {
+                                    for (int i = oldSize; i < 200; ++i) {
+                                        boids_[i].position.x = swarmCenter_.x + ((rand() % 1600) - 800.0f);
+                                        boids_[i].position.y = swarmCenter_.y + ((rand() % 800) - 400.0f);
+                                        boids_[i].position.z = 0.0f;
+                                        float angle = (rand() % 360) * 3.14159f / 180.0f;
+                                        boids_[i].velocity.x = cosf(angle) * boidSpeed_;
+                                        boids_[i].velocity.y = sinf(angle) * boidSpeed_;
+                                        boids_[i].velocity.z = 0.0f;
+                                        boids_[i].color = { 0.2f + (rand()%30)/100.0f, 0.6f + (rand()%40)/100.0f, 0.9f + (rand()%10)/100.0f, 0.8f };
+                                        boids_[i].scale = 2.0f + (rand() % 60) / 10.0f;
+                                        // Globe coordinates
+                                        float theta = (rand() % 360) * 3.14159f / 180.0f;
+                                        float phi = acosf(2.0f * (rand() % 1000) / 1000.0f - 1.0f);
+                                        boids_[i].baseGlobePos.x = sinf(phi) * cosf(theta);
+                                        boids_[i].baseGlobePos.y = cosf(phi);
+                                        boids_[i].baseGlobePos.z = sinf(phi) * sinf(theta);
+                                    }
+                                }
+                                SaveData();
+                                handledMouse = true;
+                            } else if (mx >= panelX + 260.0f && mx <= panelX + 350.0f) {
+                                graphicsQuality_ = 2;
+                                int oldSize = (int)boids_.size();
+                                boids_.resize(350);
+                                if (oldSize < 350) {
+                                    for (int i = oldSize; i < 350; ++i) {
+                                        boids_[i].position.x = swarmCenter_.x + ((rand() % 1600) - 800.0f);
+                                        boids_[i].position.y = swarmCenter_.y + ((rand() % 800) - 400.0f);
+                                        boids_[i].position.z = 0.0f;
+                                        float angle = (rand() % 360) * 3.14159f / 180.0f;
+                                        boids_[i].velocity.x = cosf(angle) * boidSpeed_;
+                                        boids_[i].velocity.y = sinf(angle) * boidSpeed_;
+                                        boids_[i].velocity.z = 0.0f;
+                                        boids_[i].color = { 0.2f + (rand()%30)/100.0f, 0.6f + (rand()%40)/100.0f, 0.9f + (rand()%10)/100.0f, 0.8f };
+                                        boids_[i].scale = 2.0f + (rand() % 60) / 10.0f;
+                                        // Globe coordinates
+                                        float theta = (rand() % 360) * 3.14159f / 180.0f;
+                                        float phi = acosf(2.0f * (rand() % 1000) / 1000.0f - 1.0f);
+                                        boids_[i].baseGlobePos.x = sinf(phi) * cosf(theta);
+                                        boids_[i].baseGlobePos.y = cosf(phi);
+                                        boids_[i].baseGlobePos.z = sinf(phi) * sinf(theta);
+                                    }
+                                }
+                                SaveData();
+                                handledMouse = true;
+                            }
+                        }
+                        // Reset Window Position
+                        else if (mx >= panelX + 50.0f && mx <= panelX + 250.0f && my >= panelY + 1730.0f && my <= panelY + 1775.0f) {
+                            HWND hwnd = dx_->GetHwnd();
+                            MONITORINFO mi = { sizeof(mi) };
+                            GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi);
+                            int monitorW = mi.rcMonitor.right - mi.rcMonitor.left;
+                            int monitorH = mi.rcMonitor.bottom - mi.rcMonitor.top;
+                            
+                            int winW = isMascotMode_ ? 250 : monitorW;
+                            int winH = isMascotMode_ ? 320 : monitorH;
+                            int winX = isMascotMode_ ? (mi.rcMonitor.left + (monitorW - winW) / 2) : mi.rcMonitor.left;
+                            int winY = isMascotMode_ ? (mi.rcMonitor.top + (monitorH - winH) / 2) : mi.rcMonitor.top;
+                            
+                            SetWindowPos(hwnd, isMascotMode_ ? HWND_TOPMOST : HWND_NOTOPMOST, winX, winY, winW, winH, SWP_SHOWWINDOW);
                             handledMouse = true;
                         }
                     }
@@ -839,96 +962,102 @@ void MainScene::Update() {
                 if (input->Trigger(DIK_F11)) {
                     zenMode_ = !zenMode_;
                     if (zenMode_) isSettingsOpen_ = false;
-                    if (Engine::Audio::GetInstance()) Engine::Audio::GetInstance()->Play(soundZen_, false, 0.4f);
+                    if (Engine::Audio::GetInstance()) Engine::Audio::GetInstance()->Play(soundZen_, false, seVolume_);
                 }
 
                 // --- IME対応の日本語入力処理 ---
                 // WindowDX.cpp で捕捉した WM_CHAR のバッファを追加
-                if (!g_CharInputBuffer.empty()) {
-                    if (inputBuffer_.length() < 100) { // 入力制限を少し緩和
-                        inputBuffer_ += g_CharInputBuffer;
+                bool isForcedBreak = (isForcedBreakMode_ && !isPomodoroWork_);
+                if (!isForcedBreak) {
+                    if (!g_CharInputBuffer.empty()) {
+                        if (inputBuffer_.length() < 100) { // 入力制限を少し緩和
+                            inputBuffer_ += g_CharInputBuffer;
+                        }
+                        g_CharInputBuffer.clear();
                     }
+
+                    if (input->Trigger(DIK_BACK) && !inputBuffer_.empty()) {
+                        // 簡易的なバックスペース処理 (UTF-8マルチバイト対応 of 末尾削除)
+                        while (!inputBuffer_.empty()) {
+                            unsigned char c = inputBuffer_.back();
+                            inputBuffer_.pop_back();
+                            if ((c & 0xC0) != 0x80) break; // UTF-8の先頭バイトなら終了
+                        }
+                    }
+                    
+                    // 星を落とす（文字列の送信）処理
+                    // IMEが変換中（g_ImeCompositionStringが空でない）の時のEnterキー（変換確定）は無視する
+                    if (input->Trigger(DIK_RETURN) && !inputBuffer_.empty() && g_ImeCompositionString.empty()) {
+                        if (Engine::Audio::GetInstance()) Engine::Audio::GetInstance()->Play(soundSend_, false, seVolume_);
+                        if (!boids_.empty()) {
+                            int randIdx = rand() % boids_.size();
+                            boids_[randIdx].customText = inputBuffer_;
+                            boids_[randIdx].scale = 6.5f; 
+                            boids_[randIdx].color = {1.0f, 0.8f, 0.6f, 1.0f}; 
+                            
+                            if (visualMode_ == 2) {
+                                // Falling Blocks の時は、上空からランダムな方向に落とす
+                                boids_[randIdx].position.x = 50.0f + (rand() % (Engine::WindowDX::kW - 100));
+                                boids_[randIdx].position.y = -100.0f; // 画面外の少し上
+                                boids_[randIdx].velocity.x = ((rand() % 100) - 50) * 10.0f;
+                                boids_[randIdx].velocity.y = 0.0f;
+                                boids_[randIdx].freeTimer = 0.5f;
+                            }
+                        }
+                        
+                        // --- 星からのささやき（キーワードマッチングによる疑似AI） ---
+                        std::string t = inputBuffer_;
+                        // 英語やローマ字の大文字小文字の揺れを吸収するため小文字化
+                        std::string t_lower = t;
+                        for (char& c : t_lower) {
+                            if (c >= 'A' && c <= 'Z') c = c + ('a' - 'A');
+                        }
+
+                        auto containsAny = [&](const std::vector<std::string>& words) {
+                            for (const auto& w : words) {
+                                if (t_lower.find(w) != std::string::npos) return true;
+                            }
+                            return false;
+                        };
+
+                        if (containsAny({"疲れ", "つかれ", "ツカレ", "tsukare", "tukare", "辛い", "つらい", "ツライ", "tsurai", "turai", "しんどい", "シンドイ", "shindoi", "sindoi", "限界", "げんかい", "genkai", "tired", "exhausted", "hard"})) {
+                            currentAIWhisper_ = "『今日一日 本当によく頑張りましたね 今はただ 休んでください』";
+                        } else if (containsAny({"ミス", "みす", "misu", "miss", "失敗", "しっぱい", "shippai", "sippai", "ダメ", "だめ", "dame", "fail"})) {
+                            currentAIWhisper_ = "『その悔しさは あなたが真剣に向き合っている証拠です 大丈夫』";
+                        } else if (containsAny({"悲し", "かなし", "kanashi", "kanasi", "不安", "ふあん", "フアン", "huan", "fuan", "怖い", "こわい", "kowai", "sad", "anxious", "scared", "fear"})) {
+                            currentAIWhisper_ = "『無理にポジティブにならなくていいんです ここに感情を置いていってください』";
+                        } else if (containsAny({"怒", "おこ", "いかり", "ikari", "oko", "イライラ", "いらいら", "iraira", "むかつく", "ムカツク", "mukatsuku", "mukakuku", "angry", "mad", "hate"})) {
+                            currentAIWhisper_ = "『感情の波はいずれ凪になります 今はここで ゆっくりと深呼吸を』";
+                        } else if (containsAny({"嬉し", "うれし", "ureshi", "uresi", "楽し", "たのし", "tanoshi", "tanosi", "最高", "さいこう", "saikou", "happy", "fun", "great", "glad", "joy"})) {
+                            currentAIWhisper_ = "『あなたの温かい感情が この場所をさらに明るくしてくれました』";
+                        } else if (containsAny({"眠い", "ねむい", "nemui", "寝たい", "ねたい", "netai", "sleepy", "sleep"})) {
+                            currentAIWhisper_ = "『星たちの瞬きを見ながら ゆっくりとまぶたを閉じてみませんか？』";
+                        } else {
+                            // どれにも当てはまらない場合は名言からランダム
+                            const char* whispers[] = {
+                                "『ここは あなたの心を休める場所です』",
+                                "『あなたが落とした言葉は やがて星になって輝きます』",
+                                "『静かな時間が あなたの心に平穏をもたらしますように』",
+                                "『焦る必要はありません 自分のペースで息をしてください』",
+                                "『空を見上げる余裕が 少しだけ心を軽くしてくれます』"
+                            };
+                            currentAIWhisper_ = whispers[rand() % 5];
+                        }
+                        
+                        // 入力した気持ちをログに保存（最大50件）
+                        savedFeelings_.push_back(inputBuffer_);
+                        if (savedFeelings_.size() > 50) {
+                            savedFeelings_.erase(savedFeelings_.begin());
+                        }
+                        SaveData();
+
+                        inputBuffer_.clear();
+                        g_CharInputBuffer.clear(); // 念のためクリア
+                    }
+                } else {
+                    inputBuffer_.clear();
                     g_CharInputBuffer.clear();
                 }
-
-                if (input->Trigger(DIK_BACK) && !inputBuffer_.empty()) {
-                    // 簡易的なバックスペース処理 (UTF-8マルチバイト対応の末尾削除)
-                    while (!inputBuffer_.empty()) {
-                        unsigned char c = inputBuffer_.back();
-                        inputBuffer_.pop_back();
-                        if ((c & 0xC0) != 0x80) break; // UTF-8の先頭バイトなら終了
-                    }
-                }
-                
-                // 星を落とす（文字列の送信）処理
-                // IMEが変換中（g_ImeCompositionStringが空でない）の時のEnterキー（変換確定）は無視する
-                if (input->Trigger(DIK_RETURN) && !inputBuffer_.empty() && g_ImeCompositionString.empty()) {
-                    if (Engine::Audio::GetInstance()) Engine::Audio::GetInstance()->Play(soundSend_, false, 0.4f);
-                    if (!boids_.empty()) {
-                        int randIdx = rand() % boids_.size();
-                        boids_[randIdx].customText = inputBuffer_;
-                    boids_[randIdx].scale = 6.5f; 
-                    boids_[randIdx].color = {1.0f, 0.8f, 0.6f, 1.0f}; 
-                    
-                    if (visualMode_ == 2) {
-                        // Falling Blocks の時は、上空からランダムな方向に落とす
-                        boids_[randIdx].position.x = 50.0f + (rand() % (Engine::WindowDX::kW - 100));
-                        boids_[randIdx].position.y = -100.0f; // 画面外の少し上
-                        boids_[randIdx].velocity.x = ((rand() % 100) - 50) * 10.0f;
-                        boids_[randIdx].velocity.y = 0.0f;
-                        boids_[randIdx].freeTimer = 0.5f;
-                    }
-                }
-                
-                // --- 星からのささやき（キーワードマッチングによる疑似AI） ---
-                std::string t = inputBuffer_;
-                // 英語やローマ字の大文字小文字の揺れを吸収するため小文字化
-                std::string t_lower = t;
-                for (char& c : t_lower) {
-                    if (c >= 'A' && c <= 'Z') c = c + ('a' - 'A');
-                }
-
-                auto containsAny = [&](const std::vector<std::string>& words) {
-                    for (const auto& w : words) {
-                        if (t_lower.find(w) != std::string::npos) return true;
-                    }
-                    return false;
-                };
-
-                if (containsAny({"疲れ", "つかれ", "ツカレ", "tsukare", "tukare", "辛い", "つらい", "ツライ", "tsurai", "turai", "しんどい", "シンドイ", "shindoi", "sindoi", "限界", "げんかい", "genkai", "tired", "exhausted", "hard"})) {
-                    currentAIWhisper_ = "『今日一日 本当によく頑張りましたね 今はただ 休んでください』";
-                } else if (containsAny({"ミス", "みす", "misu", "miss", "失敗", "しっぱい", "shippai", "sippai", "ダメ", "だめ", "dame", "fail"})) {
-                    currentAIWhisper_ = "『その悔しさは あなたが真剣に向き合っている証拠です 大丈夫』";
-                } else if (containsAny({"悲し", "かなし", "kanashi", "kanasi", "不安", "ふあん", "フアン", "huan", "fuan", "怖い", "こわい", "kowai", "sad", "anxious", "scared", "fear"})) {
-                    currentAIWhisper_ = "『無理にポジティブにならなくていいんです ここに感情を置いていってください』";
-                } else if (containsAny({"怒", "おこ", "いかり", "ikari", "oko", "イライラ", "いらいら", "iraira", "むかつく", "ムカツク", "mukatsuku", "mukakuku", "angry", "mad", "hate"})) {
-                    currentAIWhisper_ = "『感情の波はいずれ凪になります 今はここで ゆっくりと深呼吸を』";
-                } else if (containsAny({"嬉し", "うれし", "ureshi", "uresi", "楽し", "たのし", "tanoshi", "tanosi", "最高", "さいこう", "saikou", "happy", "fun", "great", "glad", "joy"})) {
-                    currentAIWhisper_ = "『あなたの温かい感情が この場所をさらに明るくしてくれました』";
-                } else if (containsAny({"眠い", "ねむい", "nemui", "寝たい", "ねたい", "netai", "sleepy", "sleep"})) {
-                    currentAIWhisper_ = "『星たちの瞬きを見ながら ゆっくりとまぶたを閉じてみませんか？』";
-                } else {
-                    // どれにも当てはまらない場合は名言からランダム
-                    const char* whispers[] = {
-                        "『ここは あなたの心を休める場所です』",
-                        "『あなたが落とした言葉は やがて星になって輝きます』",
-                        "『静かな時間が あなたの心に平穏をもたらしますように』",
-                        "『焦る必要はありません 自分のペースで息をしてください』",
-                        "『空を見上げる余裕が 少しだけ心を軽くしてくれます』"
-                    };
-                    currentAIWhisper_ = whispers[rand() % 5];
-                }
-                
-                // 入力した気持ちをログに保存（最大50件）
-                savedFeelings_.push_back(inputBuffer_);
-                if (savedFeelings_.size() > 50) {
-                    savedFeelings_.erase(savedFeelings_.begin());
-                }
-                SaveData();
-
-                inputBuffer_.clear();
-                g_CharInputBuffer.clear(); // 念のためクリア
-            }
         } // end if (!isSettingsOpen_)
     } // end if (!isMascotMode_)
     } // end else (transitionTimer_ == 0)
@@ -970,7 +1099,7 @@ void MainScene::Update() {
         }
     }
 
-    bool isInteractingFrame = !isMascotMode_ && !isSettingsOpen_;
+    bool isInteractingFrame = !isMascotMode_ && !isSettingsOpen_ && !(isForcedBreakMode_ && !isPomodoroWork_);
 
     // Gravityの爆発ロジックの更新
     if (isInteractingFrame && interactionMode_ == 1) {
@@ -1406,7 +1535,7 @@ void MainScene::Update() {
         float mDist = sqrtf(mDistSq);
 
         // UI操作中（設定画面が開いている等）は一部のインタラクションを無効化する
-        bool isInteracting = !isMascotMode_ && !isSettingsOpen_;
+        bool isInteracting = !isMascotMode_ && !isSettingsOpen_ && !(isForcedBreakMode_ && !isPomodoroWork_);
 
         if (interactionMode_ == 0) {
             // モード0: Repel（回避・静寂モード）
@@ -1606,8 +1735,8 @@ void MainScene::Update() {
                     b.velocity.y -= ny * 20.0f;
                     b.scale = 6.0f; // ぶつかると一瞬大きくなる
                     if (Engine::Audio::GetInstance()) {
-                        // 少し音量を抑えめにして同時に鳴りすぎないようにする
-                        Engine::Audio::GetInstance()->Play(soundHit_, false, 0.2f);
+                        // ファイル自体で音量を調整済みのためseVolume_で再生
+                        Engine::Audio::GetInstance()->Play(soundHit_, false, seVolume_);
                     }
                 }
             }
@@ -2264,12 +2393,12 @@ void MainScene::Draw() {
 
         // 中央のプログレスリング（円弧）
         float cx = 125.0f;
-        // さらにゲージを下げる(132.0f -> 138.0f)
-        float cy = 138.0f;
+        // ゲージと上の文字が近すぎないよう、さらに下へ配置
+        float cy = 148.0f;
         float radius = 80.0f;
             
-            float currentTarget = isPomodoroWork_ ? (25.0f * 60.0f) : (5.0f * 60.0f);
-            float progress = 1.0f - (pomodoroTimer_ / currentTarget); // 時間経過で減っていく
+        float currentTarget = isPomodoroWork_ ? (pWorkDurationMinutes_ * 60.0f) : (pRelaxDurationMinutes_ * 60.0f);
+        float progress = 1.0f - (pomodoroTimer_ / currentTarget); // 時間経過で減っていく
         
         // ガウスブラーシェーダーによる完璧なプロシージャルぼかし円
         auto drawGaussianCircle = [&](float cx_c, float cy_c, float maxR, Engine::Vector4 baseColor) {
@@ -2377,8 +2506,8 @@ void MainScene::Draw() {
         float timeW = renderer_->MeasureTextWidth(timeText, 0.85f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
         Engine::Vector4 timeCol = currentColor_;
         timeCol.w *= mascotAlpha;
-        // Y軸のオフセットを大きくして、数字を上へ移動 (-15.0f -> -22.0f)
-        renderer_->DrawString(timeText, cx - timeW / 2.0f, cy - 22.0f, 0.85f, timeCol, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+        // 数字が円の上下中央に配置されるようにオフセットを調整 (cy - 12.0f -> cy - 28.0f)
+        renderer_->DrawString(timeText, cx - timeW / 2.0f, cy - 28.0f, 0.85f, timeCol, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
         
         // ステータス (Focus Time / Relax Time)
         const char* pomoText = isPomodoroWork_ ? "Focus Time" : "Relax Time";
@@ -2569,7 +2698,7 @@ void MainScene::Draw() {
             int hour12 = (hour % 12 == 0) ? 12 : (hour % 12);
             snprintf(timeText, sizeof(timeText), "%02d:%02d %s", hour12, now.tm_min, ampm);
             
-            float currentTarget = isPomodoroWork_ ? (25.0f * 60.0f) : (5.0f * 60.0f);
+            float currentTarget = isPomodoroWork_ ? (pWorkDurationMinutes_ * 60.0f) : (pRelaxDurationMinutes_ * 60.0f);
             int remainingSec = (int)(currentTarget - pomodoroTimer_);
             int m = remainingSec / 60;
             int s = remainingSec % 60;
@@ -2581,7 +2710,7 @@ void MainScene::Draw() {
             }
             
             // 2. サイズ計測とレイアウト計算
-            float pomoScale = 0.9f; // 少し大きすぎたので0.9fに調整してスタイリッシュに
+            float pomoScale = 0.9f; // 大きさは前のまま
             float timeScale = 0.45f;
             float pomoW = renderer_->MeasureTextWidth(pomoText, pomoScale, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
             float timeW = renderer_->MeasureTextWidth(timeText, timeScale, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
@@ -2591,22 +2720,49 @@ void MainScene::Draw() {
             float paddingX = 25.0f;
             float paddingY = 20.0f;
             float panelW = std::max(pomoW, timeW) + paddingX * 2.0f;
-            float panelH = 115.0f;
+            float panelH = 115.0f; // 両方を綺麗に囲む高さ
             
-            // 3. 背景パネルの描画（角丸半透明）
-            Engine::Renderer::SpriteDesc panelBg{};
-            panelBg.w = panelW;
-            panelBg.h = panelH;
-            panelBg.x = panelX;
-            panelBg.y = panelY;
-            panelBg.color = {0.12f, 0.14f, 0.18f, 0.8f}; // 背景と少しだけコントラストをつける
-            panelBg.layer = 88;
-            renderer_->DrawSprite(roundedRectTex_ ? roundedRectTex_ : whiteTex_, panelBg);
+            // 3. 背景パネルの描画（黒いプレートにならないよう、完全なすりガラス風の透け感）
+            // 半透明時の重なり（アルファの蓄積による黒ずみ）を完全に防ぐ、精密な角丸描画アルゴリズム
+            auto drawCleanRoundedRect = [&](float bx, float by, float bw, float bh, float r, Engine::Vector4 c, int layer) {
+                Engine::Renderer::SpriteDesc lr{};
+                lr.color = c; lr.layer = layer;
+                
+                // 1. 中央の大きな矩形 (左右の角丸半径分を引いた幅、上下は全高)
+                lr.x = bx + r; lr.y = by; lr.w = bw - r * 2.0f; lr.h = bh;
+                renderer_->DrawSprite(whiteTex_, lr);
+                
+                // 2. 左側の矩形 (上下の角丸半径分を引いた高さ)
+                lr.x = bx; lr.y = by + r; lr.w = r; lr.h = bh - r * 2.0f;
+                renderer_->DrawSprite(whiteTex_, lr);
+                
+                // 3. 右側の矩形 (上下の角丸半径分を引いた高さ)
+                lr.x = bx + bw - r; lr.y = by + r; lr.w = r; lr.h = bh - r * 2.0f;
+                renderer_->DrawSprite(whiteTex_, lr);
+                
+                // 4. 四隅の滑らかな丸み（各象限のみを描画し、中央・左右の矩形と1ピクセルも重ねない）
+                float r2 = r * r;
+                auto drawQuadrant = [&](float cx, float cy, bool isLeft, bool isTop) {
+                    float startY = isTop ? -r : 0.0f;
+                    float endY   = isTop ? 0.0f : r;
+                    for (float dy = startY; dy < endY; dy += 1.0f) {
+                        float dx = sqrtf(std::max(0.0f, r2 - dy * dy));
+                        Engine::Renderer::SpriteDesc sd{};
+                        sd.w = dx; sd.h = 1.05f; // 重なりによるアルファ蓄積を防ぐため高さを1ピクセルに近づける
+                        sd.x = isLeft ? (cx - dx) : cx; 
+                        sd.y = cy + dy;
+                        sd.color = c; sd.layer = layer;
+                        renderer_->DrawSprite(whiteTex_, sd);
+                    }
+                };
+                drawQuadrant(bx + r, by + r, true, true);         // 左上
+                drawQuadrant(bx + bw - r, by + r, false, true);   // 右上
+                drawQuadrant(bx + r, by + bh - r, true, false);   // 左下
+                drawQuadrant(bx + bw - r, by + bh - r, false, false); // 右下
+            };
+            drawCleanRoundedRect(panelX, panelY, panelW, panelH, 15.0f, {1.0f, 1.0f, 1.0f, 0.08f}, 88);
             
             // 4. テキストの描画
-            // 違和感の原因：極端にサイズの違うテキストを単に左揃えにすると、右側に不自然な余白ができ、アンバランスになるため。
-            // 解決策：時計を「右寄せ」にし、パネル全体の四角いシルエットを綺麗に保つ。
-            
             // 1段目: 現在時刻 (右寄せにしてレイアウトを引き締める)
             float timeX = panelX + panelW - paddingX - timeW;
             renderer_->DrawString(timeText, timeX, panelY + paddingY, timeScale, {0.65f, 0.7f, 0.8f, 0.9f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
@@ -2708,21 +2864,34 @@ void MainScene::DrawUI() {
         // テキストの描画
         if (isSettingsOpen_ || settingsSlideOffset_ > 0.01f) {
             // 設定メニューの背景パネル
-            float panelW = 540.0f; 
-            float contentH = 1060.0f; // コンテンツ自体の高さを元の長さに戻す
+            float panelW = 620.0f; 
             float targetPanelX = Engine::WindowDX::kW - panelW;
             float offscreenPanelX = Engine::WindowDX::kW;
             float panelX = offscreenPanelX + (targetPanelX - offscreenPanelX) * settingsSlideOffset_;
-            float panelY = Engine::WindowDX::kH / 2.0f - contentH / 2.0f + menuScrollY_;
+            float panelY = menuScrollY_ + 50.0f;
 
             Engine::Renderer::SpriteDesc sbg{};
             sbg.w = panelW; sbg.h = (float)Engine::WindowDX::kH;
             sbg.x = panelX; sbg.y = 0.0f; // 背景は常に画面全体
-            sbg.color = {0.05f, 0.05f, 0.05f, 0.95f};
+            sbg.color = {0.02f, 0.02f, 0.03f, 0.85f};
             sbg.layer = 100; // パネルの背景
             renderer_->DrawSprite(whiteTex_, sbg);
+
+            // パネルの左端に細い光沢ライン (Glassmorphism highlight)
+            Engine::Renderer::SpriteDesc sLine{};
+            sLine.x = panelX; sLine.y = 0.0f; sLine.w = 1.0f; sLine.h = (float)Engine::WindowDX::kH;
+            sLine.color = {1.0f, 1.0f, 1.0f, 0.1f}; sLine.layer = 101;
+            renderer_->DrawSprite(whiteTex_, sLine);
             
-            renderer_->DrawString("Color Palette", panelX + 20.0f, panelY + 20.0f, 0.6f, {1,1,1,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            auto drawSectionHeader = [&](float x, float y, const char* title) {
+                renderer_->DrawString(title, x, y, 0.45f, {0.85f, 0.85f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+                Engine::Renderer::SpriteDesc sep{};
+                sep.x = x; sep.y = y + 26.0f; sep.w = 480.0f; sep.h = 1.0f;
+                sep.color = {1.0f, 1.0f, 1.0f, 0.08f}; sep.layer = 101;
+                renderer_->DrawSprite(whiteTex_, sep);
+            };
+
+            drawSectionHeader(panelX + 20.0f, panelY + 20.0f, "Color Palette");
             renderer_->DrawString("Select your environment", panelX + 20.0f, panelY + 55.0f, 0.35f, {0.6f,0.6f,0.6f,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
             
             // ×ボタンの描画 (右上・固定配置・少し大きく)
@@ -2807,7 +2976,7 @@ void MainScene::DrawUI() {
             }
             
             // --- Visual ModeのUI描画 ---
-            renderer_->DrawString("Visual Mode", panelX + 20.0f, panelY + 210.0f, 0.45f, {1,1,1,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            drawSectionHeader(panelX + 20.0f, panelY + 210.0f, "Visual Mode");
             
             const char* vModeNames[] = { "Constellation", "CelestialGlobe", "FallingBlocks", "BloomingTree" };
             Engine::Vector4 vModeColors[] = {
@@ -2835,7 +3004,7 @@ void MainScene::DrawUI() {
             }
 
             // --- インタラクションモードのUI描画 ---
-            renderer_->DrawString("Interaction Mode", panelX + 20.0f, panelY + 370.0f, 0.45f, {1,1,1,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            drawSectionHeader(panelX + 20.0f, panelY + 370.0f, "Interaction Mode");
             
             const char* modeNames[] = { "Repel", "Gravity", "Ripple", "Popcorn", "Slingshot" };
             Engine::Vector4 modeColors[] = {
@@ -2930,13 +3099,13 @@ void MainScene::DrawUI() {
             }
 
             // --- Node ShapeのUI描画 ---
-            renderer_->DrawString("Node Shape", panelX + 20.0f, panelY + 640.0f, 0.45f, {1,1,1,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            drawSectionHeader(panelX + 20.0f, panelY + 640.0f, "Node Shape");
             
             const char* shapeNames[] = { "Square", "Circle", "Diamond", "Star" };
             
             for (int i = 0; i < 4; ++i) {
                 float sx = panelX + 50.0f + i * 110.0f;
-                float sy = panelY + 680.0f; // さらに下にずらす
+                float sy = panelY + 700.0f; // さらに下にずらす
                 
                 // 選択中の場合は枠を描画
                 if (i == currentShapeMode_) {
@@ -2988,62 +3157,180 @@ void MainScene::DrawUI() {
                     renderer_->DrawSprite(whiteTex_, s3);
                 }
                 
-                // モード名
                 float tw = renderer_->MeasureTextWidth(shapeNames[i], 0.3f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-                renderer_->DrawString(shapeNames[i], sx + 35.0f - tw/2.0f, sy + 78.0f, 0.3f, {0.8f,0.8f,0.8f,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+                renderer_->DrawString(shapeNames[i], sx + 35.0f - tw/2.0f, sy + 85.0f, 0.3f, {0.8f,0.8f,0.8f,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
             }
             
 
             // --- Custom Color UI ---
-            renderer_->DrawString("Custom Node & Text Color", panelX + 20.0f, panelY + 800.0f, 0.45f, {1,1,1,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-            
             auto drawToggle = [&](float tx, float ty, const char* label, bool enabled, Engine::Vector4 color) {
-                drawRoundedRectUI(tx, ty, 130.0f, 60.0f, 10.0f, enabled ? color : Engine::Vector4{0.2f, 0.2f, 0.25f, 1.0f}, 102);
-                float tw = renderer_->MeasureTextWidth(label, 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-                renderer_->DrawString(label, tx + 65.0f - tw/2.0f, ty + 20.0f, 0.35f, {1.0f, 1.0f, 1.0f, 0.9f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-                const char* stateStr = enabled ? "ON" : "OFF";
-                float sw = renderer_->MeasureTextWidth(stateStr, 0.25f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-                renderer_->DrawString(stateStr, tx + 65.0f - sw/2.0f, ty + 45.0f, 0.25f, {0.7f, 0.7f, 0.7f, 0.9f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-            };
-            
-            auto drawSlider = [&](float sx, float sy, const char* label, float val, Engine::Vector4 col) {
-                renderer_->DrawString(label, sx - 25.0f, sy - 5.0f, 0.3f, {0.8f, 0.8f, 0.8f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-                // Background track
-                Engine::Renderer::SpriteDesc track{};
-                track.x = sx; track.y = sy; track.w = 250.0f; track.h = 10.0f;
-                track.color = {0.2f, 0.2f, 0.2f, 1.0f}; track.layer = 102;
-                renderer_->DrawSprite(whiteTex_, track);
-                // Fill
-                Engine::Renderer::SpriteDesc fill = track;
-                fill.w = val * 250.0f; fill.color = col; fill.layer = 103;
-                renderer_->DrawSprite(whiteTex_, fill);
-                // Handle
+                renderer_->DrawString(label, tx, ty + 12.0f, 0.35f, {0.9f, 0.9f, 0.95f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+                float swX = tx + 160.0f;
+                float swY = ty + 10.0f;
+                float swW = 40.0f;
+                float swH = 20.0f;
+                bool isHover = (mx >= tx && mx <= tx + 200.0f && my >= ty && my <= ty + 40.0f);
+                Engine::Vector4 trackColor = enabled ? color : (isHover ? Engine::Vector4{0.25f, 0.25f, 0.3f, 1.0f} : Engine::Vector4{0.15f, 0.15f, 0.18f, 1.0f});
+                drawRoundedRectUI(swX, swY, swW, swH, 10.0f, trackColor, 102);
+                
                 Engine::Renderer::SpriteDesc handle{};
-                handle.w = 16.0f; handle.h = 16.0f;
-                handle.x = sx + val * 250.0f - 8.0f; handle.y = sy - 3.0f;
-                handle.color = {1.0f, 1.0f, 1.0f, 1.0f}; handle.layer = 104;
+                handle.w = 14.0f; handle.h = 14.0f;
+                handle.x = enabled ? (swX + swW - 17.0f) : (swX + 3.0f);
+                handle.y = swY + 3.0f;
+                handle.color = {1.0f, 1.0f, 1.0f, 1.0f}; handle.layer = 103;
                 renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, handle);
             };
-
-            // Node Color
-            drawToggle(panelX + 50.0f, panelY + 840.0f, "Node Color", useCustomNodeColor_, {customNodeColor_.x, customNodeColor_.y, customNodeColor_.z, 1.0f});
-            if (useCustomNodeColor_) {
-                drawSlider(panelX + 220.0f, panelY + 840.0f, "R", customNodeColor_.x, {1.0f, 0.3f, 0.3f, 1.0f});
-                drawSlider(panelX + 220.0f, panelY + 870.0f, "G", customNodeColor_.y, {0.3f, 1.0f, 0.3f, 1.0f});
-                drawSlider(panelX + 220.0f, panelY + 900.0f, "B", customNodeColor_.z, {0.3f, 0.3f, 1.0f, 1.0f});
-            } else {
-                renderer_->DrawString("Enabled by Theme", panelX + 220.0f, panelY + 865.0f, 0.35f, {0.5f, 0.5f, 0.5f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-            }
             
-            // Text Color
-            drawToggle(panelX + 50.0f, panelY + 940.0f, "Text Color", useCustomTextColor_, {customTextColor_.x, customTextColor_.y, customTextColor_.z, 1.0f});
-            if (useCustomTextColor_) {
-                drawSlider(panelX + 220.0f, panelY + 940.0f, "R", customTextColor_.x, {1.0f, 0.3f, 0.3f, 1.0f});
-                drawSlider(panelX + 220.0f, panelY + 970.0f, "G", customTextColor_.y, {0.3f, 1.0f, 0.3f, 1.0f});
-                drawSlider(panelX + 220.0f, panelY + 1000.0f, "B", customTextColor_.z, {0.3f, 0.3f, 1.0f, 1.0f});
+            auto drawCard = [&](float cx, float cy, float cw, float ch) {
+                drawRoundedRectUI(cx, cy, cw, ch, 10.0f, {0.15f, 0.15f, 0.2f, 0.8f}, 101);
+            };
+
+            auto drawSlider = [&](float sx, float sy, float trackW, const char* label, float val, Engine::Vector4 col, const char* valStr = nullptr) {
+                if (label && label[0] != '\0') {
+                    float tw = renderer_->MeasureTextWidth(label, 0.25f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+                    renderer_->DrawString(label, sx - tw - 15.0f, sy - 2.0f, 0.25f, {0.8f, 0.85f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+                }
+                
+                float trackH = 10.0f;
+                float trackY = sy + 1.0f;
+                bool isHover = (mx >= sx - 10.0f && mx <= sx + trackW + 10.0f && my >= sy - 15.0f && my <= sy + 25.0f);
+                
+                drawRoundedRectUI(sx, trackY, trackW, trackH, 5.0f, {0.2f, 0.2f, 0.25f, 1.0f}, 102);
+                if (val > 0.0f) {
+                    drawRoundedRectUI(sx, trackY, val * trackW, trackH, 5.0f, col, 103);
+                }
+                
+                Engine::Renderer::SpriteDesc handle{};
+                float hSize = isHover ? 24.0f : 20.0f;
+                handle.w = hSize; handle.h = hSize;
+                handle.x = sx + val * trackW - hSize / 2.0f; 
+                handle.y = trackY + trackH / 2.0f - hSize / 2.0f;
+                handle.color = {1.0f, 1.0f, 1.0f, 1.0f}; handle.layer = 104;
+                renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, handle);
+
+                if (valStr) {
+                    renderer_->DrawString(valStr, sx + trackW + 15.0f, sy - 2.0f, 0.25f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+                }
+            };
+
+            // --- Custom Color UI ---
+            drawSectionHeader(panelX + 20.0f, panelY + 840.0f, "COLOR CUSTOMIZATION");
+            
+            char rStr[16], gStr[16], bStr[16];
+            
+            // Node Color Card
+            float ncX = panelX + 25.0f;
+            float ncY = panelY + 890.0f;
+            drawCard(ncX, ncY, 280.0f, 190.0f);
+            renderer_->DrawString("NODE COLOR", ncX + 10.0f, ncY + 10.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            
+            Engine::Renderer::SpriteDesc nPrev{};
+            nPrev.x = ncX + 15.0f; nPrev.y = ncY + 50.0f; nPrev.w = 60.0f; nPrev.h = 60.0f;
+            nPrev.color = useCustomNodeColor_ ? Engine::Vector4{customNodeColor_.x, customNodeColor_.y, customNodeColor_.z, 1.0f} : Engine::Vector4{0.3f, 0.3f, 0.3f, 1.0f};
+            nPrev.layer = 102;
+            renderer_->DrawSprite(whiteTex_, nPrev);
+            renderer_->DrawString("ノードカラー", ncX + 10.0f, ncY + 140.0f, 0.3f, {0.6f, 0.6f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+
+            if (useCustomNodeColor_) {
+                snprintf(rStr, sizeof(rStr), "%d", (int)(customNodeColor_.x * 255));
+                snprintf(gStr, sizeof(gStr), "%d", (int)(customNodeColor_.y * 255));
+                snprintf(bStr, sizeof(bStr), "%d", (int)(customNodeColor_.z * 255));
+                drawSlider(panelX + 140.0f, panelY + 940.0f, 110.0f, "R", customNodeColor_.x, {1.0f, 0.3f, 0.3f, 1.0f}, rStr);
+                drawSlider(panelX + 140.0f, panelY + 980.0f, 110.0f, "G", customNodeColor_.y, {0.3f, 1.0f, 0.3f, 1.0f}, gStr);
+                drawSlider(panelX + 140.0f, panelY + 1020.0f, 110.0f, "B", customNodeColor_.z, {0.3f, 0.3f, 1.0f, 1.0f}, bStr);
             } else {
-                renderer_->DrawString("Enabled by Theme", panelX + 220.0f, panelY + 965.0f, 0.35f, {0.5f, 0.5f, 0.5f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+                renderer_->DrawString("Enabled by Theme", panelX + 140.0f, panelY + 980.0f, 0.3f, {0.5f, 0.5f, 0.5f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
             }
+
+            // Text Color Card
+            float tcX = panelX + 315.0f;
+            float tcY = panelY + 890.0f;
+            drawCard(tcX, tcY, 280.0f, 190.0f);
+            renderer_->DrawString("TEXT COLOR", tcX + 10.0f, tcY + 10.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            
+            Engine::Renderer::SpriteDesc tPrev{};
+            tPrev.x = tcX + 15.0f; tPrev.y = tcY + 50.0f; tPrev.w = 60.0f; tPrev.h = 60.0f;
+            tPrev.color = useCustomTextColor_ ? Engine::Vector4{customTextColor_.x, customTextColor_.y, customTextColor_.z, 1.0f} : Engine::Vector4{0.3f, 0.3f, 0.3f, 1.0f};
+            tPrev.layer = 102;
+            renderer_->DrawSprite(whiteTex_, tPrev);
+            renderer_->DrawString("テキストカラー", tcX + 10.0f, tcY + 140.0f, 0.3f, {0.6f, 0.6f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+
+            if (useCustomTextColor_) {
+                snprintf(rStr, sizeof(rStr), "%d", (int)(customTextColor_.x * 255));
+                snprintf(gStr, sizeof(gStr), "%d", (int)(customTextColor_.y * 255));
+                snprintf(bStr, sizeof(bStr), "%d", (int)(customTextColor_.z * 255));
+                drawSlider(panelX + 440.0f, panelY + 940.0f, 110.0f, "R", customTextColor_.x, {1.0f, 0.3f, 0.3f, 1.0f}, rStr);
+                drawSlider(panelX + 440.0f, panelY + 980.0f, 110.0f, "G", customTextColor_.y, {0.3f, 1.0f, 0.3f, 1.0f}, gStr);
+                drawSlider(panelX + 440.0f, panelY + 1020.0f, 110.0f, "B", customTextColor_.z, {0.3f, 0.3f, 1.0f, 1.0f}, bStr);
+            } else {
+                renderer_->DrawString("Enabled by Theme", panelX + 440.0f, panelY + 980.0f, 0.3f, {0.5f, 0.5f, 0.5f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            }
+
+            // --- POMODORO CONFIGURATION ---
+            drawSectionHeader(panelX + 20.0f, panelY + 1150.0f, "POMODORO CONFIGURATION");
+            float pcY = panelY + 1200.0f;
+            drawCard(panelX + 20.0f, pcY, 560.0f, 150.0f);
+            
+            float workProgress = (pWorkDurationMinutes_ - 10.0f) / 90.0f;
+            renderer_->DrawString("Focus:", panelX + 40.0f, pcY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            char workValStr[16]; snprintf(workValStr, sizeof(workValStr), "%d min", (int)pWorkDurationMinutes_);
+            renderer_->DrawString(workValStr, panelX + 110.0f, pcY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            drawSlider(panelX + 40.0f, panelY + 1260.0f, 220.0f, "", workProgress, themes_[currentThemeIndex_].uiWork);
+
+            float relaxProgress = (pRelaxDurationMinutes_ - 1.0f) / 59.0f;
+            renderer_->DrawString("Relax:", panelX + 320.0f, pcY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            char relaxValStr[16]; snprintf(relaxValStr, sizeof(relaxValStr), "%d min", (int)pRelaxDurationMinutes_);
+            renderer_->DrawString(relaxValStr, panelX + 390.0f, pcY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            drawSlider(panelX + 320.0f, panelY + 1260.0f, 220.0f, "", relaxProgress, themes_[currentThemeIndex_].uiRelax);
+
+            renderer_->DrawString("Forced Break", panelX + 40.0f, panelY + 1305.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            renderer_->DrawString("ON", panelX + 450.0f, panelY + 1305.0f, 0.35f, {0.8f, 0.8f, 0.8f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            float swX = panelX + 490.0f;
+            float swY = panelY + 1302.0f;
+            float swW = 50.0f; float swH = 24.0f;
+            drawRoundedRectUI(swX, swY, swW, swH, 12.0f, isForcedBreakMode_ ? Engine::Vector4{0.3f, 0.8f, 0.4f, 1.0f} : Engine::Vector4{0.3f, 0.3f, 0.35f, 1.0f}, 102);
+            Engine::Renderer::SpriteDesc fbh{};
+            fbh.w = 18.0f; fbh.h = 18.0f;
+            fbh.x = isForcedBreakMode_ ? (swX + swW - 21.0f) : (swX + 3.0f);
+            fbh.y = swY + 3.0f;
+            fbh.color = {1.0f, 1.0f, 1.0f, 1.0f}; fbh.layer = 103;
+            renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, fbh);
+
+            // --- 環境設定 (画質と音量) ---
+            drawSectionHeader(panelX + 20.0f, panelY + 1390.0f, "GRAPHICS & SOUND SETTINGS");
+            float gsY = panelY + 1440.0f;
+            drawCard(panelX + 20.0f, gsY, 560.0f, 170.0f);
+
+            // Graphics Quality
+            renderer_->DrawString("Graphics Quality", panelX + 40.0f, gsY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            const char* qualityNames[] = { "Low", "Medium", "High" };
+            for (int i = 0; i < 3; ++i) {
+                float qx = panelX + 40.0f + i * 110.0f;
+                float qy = gsY + 55.0f;
+                bool isSel = (graphicsQuality_ == i);
+                bool isHover = (mx >= qx && mx <= qx + 90.0f && my >= qy && my <= qy + 40.0f);
+                Engine::Vector4 btnCol = isSel ? Engine::Vector4{0.2f, 0.5f, 0.9f, 1.0f} : (isHover ? Engine::Vector4{0.2f, 0.2f, 0.25f, 1.0f} : Engine::Vector4{0.15f, 0.15f, 0.18f, 1.0f});
+                drawRoundedRectUI(qx, qy, 90.0f, 40.0f, 8.0f, btnCol, 102);
+                float tw = renderer_->MeasureTextWidth(qualityNames[i], 0.3f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+                renderer_->DrawString(qualityNames[i], qx + 45.0f - tw/2.0f, qy + 12.0f, 0.3f, isSel ? Engine::Vector4{1,1,1,1} : Engine::Vector4{0.7f,0.7f,0.75f,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            }
+
+            // Audio Volume Sliders
+            drawSlider(panelX + 130.0f, gsY + 130.0f, 410.0f, "SE Vol", seVolume_, {0.3f, 0.7f, 0.9f, 1.0f});
+
+            // --- ディスプレイ設定 ---
+            drawSectionHeader(panelX + 20.0f, panelY + 1680.0f, "Display settings");
+            
+            // Window Reset Button
+            float rx = panelX + 50.0f;
+            float ry = panelY + 1730.0f;
+            float rw = 250.0f;
+            float rh = 45.0f;
+            bool rHover = (mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh);
+            drawRoundedRectUI(rx, ry, rw, rh, 8.0f, rHover ? Engine::Vector4{0.4f, 0.4f, 0.45f, 1.0f} : Engine::Vector4{0.25f, 0.25f, 0.3f, 1.0f}, 102);
+            const char* btnStr = "Reset Window Position";
+            float rtw = renderer_->MeasureTextWidth(btnStr, 0.3f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            renderer_->DrawString(btnStr, rx + rw/2.0f - rtw/2.0f, ry + 12.0f, 0.3f, {1,1,1,0.9f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
         }
         
         if (!isSettingsOpen_) {
@@ -3230,6 +3517,127 @@ void MainScene::DrawUI() {
         renderer_->FlushSprites();
         renderer_->FlushText();
     }
+
+    // --- バージョン表記の描画 ---
+    if (!isMascotMode_) {
+        float vw = renderer_->MeasureTextWidth(APP_VERSION, 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+        renderer_->DrawString(APP_VERSION, Engine::WindowDX::kW - vw - 20.0f, Engine::WindowDX::kH - 30.0f, 0.35f, {0.6f, 0.6f, 0.7f, 0.8f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+        renderer_->FlushText();
+    }
+
+    // --- アップデート通知ダイアログ ---
+    if (hasUpdateAvailable_ && !isMascotMode_) {
+        float updW = 320.0f;
+        float updH = 120.0f;
+        float updX = Engine::WindowDX::kW - updW - 20.0f;
+        float updY = Engine::WindowDX::kH - updH - 60.0f; // バージョン表記のさらに上
+        
+        Engine::Renderer::SpriteDesc uBg{};
+        uBg.x = updX; uBg.y = updY; uBg.w = updW; uBg.h = updH;
+        uBg.color = {0.1f, 0.12f, 0.15f, 0.95f};
+        uBg.layer = 200;
+        renderer_->DrawSprite(roundedRectTex_ ? roundedRectTex_ : whiteTex_, uBg);
+
+        renderer_->DrawString("新しいバージョンがあります！", updX + 20.0f, updY + 15.0f, 0.4f, {1,1,1,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+        std::string verMsg = std::string(APP_VERSION) + " -> " + latestVersion_;
+        renderer_->DrawString(verMsg.c_str(), updX + 20.0f, updY + 45.0f, 0.3f, {0.7f,0.7f,0.7f,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+
+        // 更新ボタン
+        float btnW = 120.0f; float btnH = 35.0f;
+        float btnX = updX + updW - btnW - 20.0f;
+        float btnY = updY + updH - btnH - 15.0f;
+        bool isHover = (mx >= btnX && mx <= btnX + btnW && my >= btnY && my <= btnY + btnH);
+        
+        Engine::Renderer::SpriteDesc bBg{};
+        bBg.x = btnX; bBg.y = btnY; bBg.w = btnW; bBg.h = btnH;
+        bBg.color = isHover ? Engine::Vector4{0.2f, 0.6f, 0.9f, 1.0f} : Engine::Vector4{0.15f, 0.4f, 0.7f, 1.0f};
+        bBg.layer = 201;
+        renderer_->DrawSprite(roundedRectTex_ ? roundedRectTex_ : whiteTex_, bBg);
+        
+        float tw = renderer_->MeasureTextWidth("更新する", 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+        renderer_->DrawString("更新する", btnX + btnW/2.0f - tw/2.0f, btnY + 5.0f, 0.35f, {1,1,1,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+
+        if (isHover && input->IsMouseTrigger(0)) {
+            // Updater.exe を起動して自身は終了
+            // updateDownloadUrl_ を引数で渡すなど
+            std::string cmdArgs = updateDownloadUrl_;
+            ShellExecuteA(NULL, "open", "Updater.exe", cmdArgs.c_str(), NULL, SW_SHOW);
+            PostMessage(dx_->GetHwnd(), WM_CLOSE, 0, 0); // 安全に終了
+        }
+        
+        // 閉じるボタン（×）
+        float closeX = updX + updW - 25.0f;
+        float closeY = updY + 5.0f;
+        bool cHover = (mx >= closeX && mx <= closeX + 20.0f && my >= closeY && my <= closeY + 20.0f);
+        renderer_->DrawString("x", closeX, closeY, 0.4f, cHover ? Engine::Vector4{1,1,1,1} : Engine::Vector4{0.5f,0.5f,0.5f,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+        if (cHover && input->IsMouseTrigger(0)) {
+            hasUpdateAvailable_ = false; // 非表示にする
+        }
+        
+        renderer_->FlushSprites();
+        renderer_->FlushText();
+    }
+
+    // --- 強制休憩モード用オーバーレイ描画 ---
+    if (isForcedBreakMode_ && !isPomodoroWork_) {
+        float currentTarget = pRelaxDurationMinutes_ * 60.0f;
+        int remainingSec = (int)(currentTarget - pomodoroTimer_);
+        if (remainingSec < 0) remainingSec = 0;
+        int m = remainingSec / 60;
+        int s = remainingSec % 60;
+        char timerStr[64];
+        snprintf(timerStr, sizeof(timerStr), "%02d:%02d", m, s);
+
+        if (isMascotMode_) {
+            // マスコットモード中の表示
+            Engine::Renderer::SpriteDesc bg{};
+            bg.w = 250.0f;
+            bg.h = 320.0f;
+            bg.x = 0.0f;
+            bg.y = 0.0f;
+            bg.color = {0.05f, 0.05f, 0.08f, 0.96f};
+            bg.layer = 140;
+            renderer_->DrawSprite(whiteTex_, bg);
+
+            const char* title = "休憩時間です";
+            float tw = renderer_->MeasureTextWidth(title, 0.5f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            renderer_->DrawString(title, 125.0f - tw/2.0f, 90.0f, 0.5f, {1,1,1,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+
+            const char* sub = "少し目を休めましょう";
+            float sw = renderer_->MeasureTextWidth(sub, 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            renderer_->DrawString(sub, 125.0f - sw/2.0f, 130.0f, 0.35f, {0.7f,0.7f,0.7f,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+
+            float timew = renderer_->MeasureTextWidth(timerStr, 0.9f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            renderer_->DrawString(timerStr, 125.0f - timew/2.0f, 180.0f, 0.9f, themes_[currentThemeIndex_].uiRelax, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+        } else {
+            // 没入モード中の表示
+            Engine::Renderer::SpriteDesc bg{};
+            bg.w = (float)Engine::WindowDX::kW;
+            bg.h = (float)Engine::WindowDX::kH;
+            bg.x = 0.0f;
+            bg.y = 0.0f;
+            bg.color = {0.03f, 0.04f, 0.06f, 0.96f};
+            bg.layer = 140;
+            renderer_->DrawSprite(whiteTex_, bg);
+
+            const char* title = "強制休憩モード";
+            float tw = renderer_->MeasureTextWidth(title, 1.2f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            renderer_->DrawString(title, Engine::WindowDX::kW/2.0f - tw/2.0f, Engine::WindowDX::kH/2.0f - 140.0f, 1.2f, {1,1,1,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+
+            const char* sub = "作業時間が終了しました。画面から目を離し、リフレッシュしてください。";
+            float sw = renderer_->MeasureTextWidth(sub, 0.45f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            renderer_->DrawString(sub, Engine::WindowDX::kW/2.0f - sw/2.0f, Engine::WindowDX::kH/2.0f - 70.0f, 0.45f, {0.7f,0.7f,0.8f,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+
+            const char* sub2 = "ゆっくりと深呼吸をして、心と体を休めましょう。";
+            float sw2 = renderer_->MeasureTextWidth(sub2, 0.45f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            renderer_->DrawString(sub2, Engine::WindowDX::kW/2.0f - sw2/2.0f, Engine::WindowDX::kH/2.0f - 30.0f, 0.45f, {0.7f,0.7f,0.8f,1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+
+            float timew = renderer_->MeasureTextWidth(timerStr, 2.0f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+            renderer_->DrawString(timerStr, Engine::WindowDX::kW/2.0f - timew/2.0f, Engine::WindowDX::kH/2.0f + 60.0f, 2.0f, themes_[currentThemeIndex_].uiRelax, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+        }
+        renderer_->FlushSprites();
+        renderer_->FlushText();
+    }
 }
 
 entt::entity MainScene::CreateEntity(const std::string& name) {
@@ -3275,6 +3683,29 @@ void MainScene::LoadData() {
         if (j.contains("totalWorkTime")) {
             totalWorkTime_ = j["totalWorkTime"].get<float>();
         }
+
+        // 新しい設定項目
+        if (j.contains("workDuration")) pWorkDurationMinutes_ = j["workDuration"].get<float>();
+        if (j.contains("relaxDuration")) pRelaxDurationMinutes_ = j["relaxDuration"].get<float>();
+        if (j.contains("forcedBreak")) isForcedBreakMode_ = j["forcedBreak"].get<bool>();
+        
+        if (j.contains("graphicsQuality")) {
+            graphicsQuality_ = j["graphicsQuality"].get<int>();
+            int targetCount = (graphicsQuality_ == 0) ? 100 : (graphicsQuality_ == 1 ? 200 : 350);
+            boids_.resize(targetCount);
+        }
+
+        if (j.contains("bgmVolume")) {
+            bgmVolume_ = j["bgmVolume"].get<float>();
+            auto* audio = Engine::Audio::GetInstance();
+            if (audio) audio->SetMasterBGMVolume(bgmVolume_);
+        }
+        if (j.contains("seVolume")) {
+            seVolume_ = j["seVolume"].get<float>();
+            auto* audio = Engine::Audio::GetInstance();
+            if (audio) audio->SetMasterSEVolume(seVolume_);
+        }
+
         if (j.contains("useCustomNodeColor")) useCustomNodeColor_ = j["useCustomNodeColor"].get<bool>();
         if (j.contains("customNodeColor")) {
             customNodeColor_.x = j["customNodeColor"][0];
@@ -3321,6 +3752,14 @@ void MainScene::SaveData() {
         j["useCustomTextColor"] = useCustomTextColor_;
         j["customTextColor"] = std::vector<float>{ customTextColor_.x, customTextColor_.y, customTextColor_.z };
 
+        // 新しい設定項目
+        j["workDuration"] = pWorkDurationMinutes_;
+        j["relaxDuration"] = pRelaxDurationMinutes_;
+        j["forcedBreak"] = isForcedBreakMode_;
+        j["graphicsQuality"] = graphicsQuality_;
+        j["bgmVolume"] = bgmVolume_;
+        j["seVolume"] = seVolume_;
+
         std::string savePath = GetExeDirectory() + "tranquil_save.json";
         std::ofstream f(savePath);
         if (f.is_open()) {
@@ -3329,6 +3768,73 @@ void MainScene::SaveData() {
     } catch (...) {
         // セーブ失敗時
     }
+}
+
+void MainScene::CheckForUpdateInfo() {
+    if (isCheckingUpdate_) return;
+    isCheckingUpdate_ = true;
+
+    std::thread([this]() {
+        HINTERNET hSession = WinHttpOpen(L"Sae Updater/1.0",
+                                         WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+                                         WINHTTP_NO_PROXY_NAME,
+                                         WINHTTP_NO_PROXY_BYPASS, 0);
+        if (hSession) {
+            HINTERNET hConnect = WinHttpConnect(hSession, L"api.github.com", INTERNET_DEFAULT_HTTPS_PORT, 0);
+            if (hConnect) {
+                HINTERNET hRequest = WinHttpOpenRequest(hConnect, L"GET", L"/repos/HakutoHenmi/Sae/releases/latest",
+                                                        NULL, WINHTTP_NO_REFERER,
+                                                        WINHTTP_DEFAULT_ACCEPT_TYPES,
+                                                        WINHTTP_FLAG_SECURE);
+                if (hRequest) {
+                    // GitHub API requires User-Agent
+                    if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
+                        if (WinHttpReceiveResponse(hRequest, NULL)) {
+                            std::string responseData;
+                            DWORD dwSize = 0;
+                            DWORD dwDownloaded = 0;
+                            do {
+                                dwSize = 0;
+                                if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) break;
+                                if (dwSize == 0) break;
+                                char* pszOutBuffer = new char[dwSize + 1];
+                                if (!pszOutBuffer) {
+                                    dwSize = 0;
+                                    break;
+                                }
+                                ZeroMemory(pszOutBuffer, dwSize + 1);
+                                if (WinHttpReadData(hRequest, (LPVOID)pszOutBuffer, dwSize, &dwDownloaded)) {
+                                    responseData.append(pszOutBuffer, dwDownloaded);
+                                }
+                                delete[] pszOutBuffer;
+                            } while (dwSize > 0);
+
+                            try {
+                                auto j = json::parse(responseData);
+                                if (j.contains("tag_name")) {
+                                    std::string tag = j["tag_name"].get<std::string>();
+                                    // "v" や "Beta v" のフォーマット揺れを考慮する場合でも、完全一致しなければ更新とする
+                                    if (tag != APP_VERSION) {
+                                        latestVersion_ = tag;
+                                        if (j.contains("assets") && j["assets"].is_array() && j["assets"].size() > 0) {
+                                            updateDownloadUrl_ = j["assets"][0]["browser_download_url"].get<std::string>();
+                                        }
+                                        hasUpdateAvailable_ = true;
+                                    }
+                                }
+                            } catch (...) {
+                                // JSONパースエラー
+                            }
+                        }
+                    }
+                    WinHttpCloseHandle(hRequest);
+                }
+                WinHttpCloseHandle(hConnect);
+            }
+            WinHttpCloseHandle(hSession);
+        }
+        isCheckingUpdate_ = false;
+    }).detach();
 }
 
 } // namespace Game

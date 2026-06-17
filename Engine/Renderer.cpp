@@ -330,6 +330,16 @@ void Renderer::BeginFrame(const float clearColorRGBA[4]) {
 	frameDrawCalls_ = 0;
 	frameParticleCount_ = 0;
 
+	// ★追加: 非同期アップロード済みリソースの安全な破棄（ガベージコレクション）
+	for (auto it = pendingUploads_.begin(); it != pendingUploads_.end(); ) {
+		it->frameCountdown--;
+		if (it->frameCountdown <= 0) {
+			it = pendingUploads_.erase(it);
+		} else {
+			++it;
+		}
+	}
+
 	cbFrame_.time += 0.016f; // 固定値だが、本来はDeltaTimeを使うべき
 
 	// インスタンス描画用のキューをクリア
@@ -2039,7 +2049,10 @@ Renderer::TextureHandle Renderer::LoadTexture2D(const std::string& filePath, boo
 
 		ID3D12CommandList* lists[] = {cl.Get()};
 		queue_->ExecuteCommandLists(1, lists);
-		WaitGPU();
+		
+		// メインスレッド（描画ループ）のフリーズを防ぐため、WaitGPU() で待たず
+		// リソースを数フレーム保持して非同期でアップロードを完了させる
+		pendingUploads_.push_back({alloc, cl, upload, 3});
 	}
 
 	const uint32_t idx = AllocateSrvIndex();

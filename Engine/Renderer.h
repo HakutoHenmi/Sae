@@ -624,6 +624,15 @@ private:
 	std::vector<InstancedDrawCall> instancedParticleDrawCalls_; // ★追加: パーティクル用
 	std::vector<SpriteDrawCall> spriteDrawCalls_; // ★追加: スプライト用
 
+	// ★追加: 非同期テクスチャアップロードのためのリソース保持
+	struct PendingUpload {
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> alloc;
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cl;
+		Microsoft::WRL::ComPtr<ID3D12Resource> upload;
+		int frameCountdown = 3; // 3フレーム後に安全に破棄
+	};
+	std::vector<PendingUpload> pendingUploads_;
+
 	// ★変更: Mesh構造体ではなくModelクラスへのスマートポインタで管理
 	std::vector<std::shared_ptr<Model>> models_;
 	std::vector<Texture> textures_;

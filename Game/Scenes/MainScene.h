@@ -146,6 +146,14 @@ private:
     int currentThemeIndex_ = 0;
     bool isSettingsOpen_ = false;
     
+    // --- 追加: ポモドーロ時間と強制休憩・画質・音量設定 ---
+    float pWorkDurationMinutes_ = 25.0f; // 作業時間(分)
+    float pRelaxDurationMinutes_ = 5.0f;  // 休憩時間(分)
+    bool isForcedBreakMode_ = false;      // 強制休憩モードフラグ
+    int graphicsQuality_ = 1;             // 0: Low, 1: Medium, 2: High
+    float bgmVolume_ = 0.5f;              // BGMマスター音量
+    float seVolume_ = 0.5f;               // SEマスター音量
+    
     // --- 追加: 文字落下によるノード増加を制御するエネルギーゲージ ---
     float stardustEnergy_ = 0.0f;
     float healingWordCooldown_ = 0.0f; // 癒やしの言葉が湧く頻度を制限するタイマー
@@ -224,6 +232,13 @@ private:
     uint32_t soundZen_ = 0xFFFFFFFF;
     uint32_t soundFocus_ = 0xFFFFFFFF;
     uint32_t soundHit_ = 0xFFFFFFFF;
+
+    // --- アップデート管理 ---
+    bool isCheckingUpdate_ = false;
+    bool hasUpdateAvailable_ = false;
+    std::string latestVersion_ = "";
+    std::string updateDownloadUrl_ = "";
+    void CheckForUpdateInfo();
 };
 
 } // namespace Game

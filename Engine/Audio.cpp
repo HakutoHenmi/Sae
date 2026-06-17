@@ -61,6 +61,7 @@ void Audio::Shutdown() {
 uint32_t Audio::Load(const std::string& path) {
 	// ★修正: GetUnifiedPath を使用して絶対パスを解決し、ワイド文字に変換
 	std::wstring wpath = Engine::PathUtils::FromUTF8(Engine::PathUtils::GetUnifiedPath(path));
+	std::replace(wpath.begin(), wpath.end(), L'/', L'\\'); // MFCreateSourceReaderFromURL requires backslashes
 
 	SoundData newSound = {};
 	if (LoadViaMF(wpath, newSound)) {
@@ -77,6 +78,10 @@ size_t Audio::Play(uint32_t soundHandle, bool loop, float volume) {
 
 	if (soundHandle >= soundDatas_.size())
 		return 0;
+
+	if (volume <= 0.001f && !loop) {
+		return 0;
+	}
 
 	const auto& sd = soundDatas_[soundHandle];
 	IXAudio2SourceVoice* src = nullptr;

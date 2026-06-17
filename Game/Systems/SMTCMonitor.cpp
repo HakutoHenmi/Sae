@@ -8,6 +8,7 @@
 #include <fstream>
 #include <filesystem>
 #include <Windows.h>
+#include <DirectXTex.h>
 
 #pragma comment(lib, "runtimeobject.lib")
 
@@ -122,12 +123,46 @@ void SMTCMonitor::MonitorLoop() {
                                             std::filesystem::create_directories("Resources/Textures/UI");
                                             thumbIndex_ = (thumbIndex_ + 1) % 10;
                                             std::string path = "Resources/Textures/UI/now_playing_" + std::to_string(thumbIndex_) + ".png";
-                                            std::ofstream ofs(path, std::ios::binary);
-                                            if (ofs) {
-                                                ofs.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
-                                                ofs.close();
-                                                info.hasThumbnail = true;
-                                                info.thumbnailPath = path;
+                                            
+                                            // DirectXTex を使用してバックグラウンドで256x256に縮小し、
+                                            // メインスレッドでの読み込み・転送負荷を最小限に抑える
+                                            bool savedAsResized = false;
+                                            DirectX::ScratchImage img;
+                                            HRESULT hr = DirectX::LoadFromWICMemory(bytes.data(), bytes.size(), DirectX::WIC_FLAGS_NONE, nullptr, img);
+                                            if (SUCCEEDED(hr)) {
+                                                const DirectX::Image* srcImg = img.GetImage(0, 0, 0);
+                                                if (srcImg) {
+                                                    DirectX::ScratchImage resized;
+                                                    hr = DirectX::Resize(*srcImg, 256, 256, DirectX::TEX_FILTER_DEFAULT, resized);
+                                                    if (SUCCEEDED(hr)) {
+                                                        const DirectX::Image* resImg = resized.GetImage(0, 0, 0);
+                                                        if (resImg) {
+                                                            DirectX::Blob blob;
+                                                            hr = DirectX::SaveToWICMemory(*resImg, DirectX::WIC_FLAGS_NONE, DirectX::GetWICCodec(DirectX::WIC_CODEC_PNG), blob);
+                                                            if (SUCCEEDED(hr)) {
+                                                                std::ofstream ofs(path, std::ios::binary);
+                                                                if (ofs) {
+                                                                    ofs.write(reinterpret_cast<const char*>(blob.GetBufferPointer()), blob.GetBufferSize());
+                                                                    ofs.close();
+                                                                    info.hasThumbnail = true;
+                                                                    info.thumbnailPath = path;
+                                                                    savedAsResized = true;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            // 万が一縮小処理に失敗した場合は、フォールバックとして生データをそのまま保存する
+                                            if (!savedAsResized) {
+                                                std::ofstream ofs(path, std::ios::binary);
+                                                if (ofs) {
+                                                    ofs.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+                                                    ofs.close();
+                                                    info.hasThumbnail = true;
+                                                    info.thumbnailPath = path;
+                                                }
                                             }
                                         }
                                     }
