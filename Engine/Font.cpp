@@ -1,6 +1,7 @@
 // Engine/Font.cpp
 #include "Font.h"
 #include "../externals/stb/stb_truetype.h"
+#include "PathUtils.h"
 
 #include <cassert>
 #include <cmath>
@@ -14,8 +15,9 @@ Font::~Font() {
 }
 
 bool Font::Load(const std::string& filePath) {
-	// バイナリモードでフォントファイルを読み込む
-	std::ifstream file(filePath, std::ios::binary | std::ios::ate);
+	// 日本語（マルチバイト）を含む絶対パスからでも安全にロードできるよう、UTF-8 からワイド文字列に変換
+	std::wstring wPath = PathUtils::FromUTF8(filePath);
+	std::ifstream file(wPath, std::ios::binary | std::ios::ate);
 	if (!file.is_open()) {
 		return false;
 	}

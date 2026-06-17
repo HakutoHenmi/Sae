@@ -18,10 +18,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ in
 			if (lastSlash)
 				*lastSlash = L'\0';
 
-			// プロジェクトルートを探す (neo_Engine ディレクトリ)
+			// プロジェクトルートを探す (Sae ディレクトリ)
 			wchar_t projectPath[32768] = {};
 			wcscpy_s(projectPath, exePath);
-			wcscat_s(projectPath, L"\\..\\..\\..\\neo_Engine");
+			wcscat_s(projectPath, L"\\..\\..\\..\\Sae");
 
 			DWORD attr = GetFileAttributesW(projectPath);
 			if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY)) {

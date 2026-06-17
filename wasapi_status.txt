@@ -1,0 +1,2 @@
+Thread Running. PacketLength: 0
+Device 0 Peak: 0.000000, ID: {0.0.0.00000000}.{ce3958a1-4052-4376-8f54-640f91945a5d}
