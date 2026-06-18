@@ -166,9 +166,9 @@ private:
     float treeZoom_ = 1.0f; // ツリーモードで画面に収めるためのカメラズーム率
 
     // カスタムカラー
-    bool useCustomNodeColor_ = false;
+    bool useCustomNodeColor_ = true;
     Engine::Vector3 customNodeColor_{ 1.0f, 1.0f, 1.0f };
-    bool useCustomTextColor_ = false;
+    bool useCustomTextColor_ = true;
     Engine::Vector3 customTextColor_{ 1.0f, 1.0f, 1.0f };
     
     // UIスクロールとアニメーション
@@ -213,6 +213,8 @@ private:
         Engine::Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
         float scale = 1.0f;
         float life = 0.0f; // 画面外に落ちるか時間経過で消滅
+        bool isDragged = false; // スリングショットでのドラッグ判定用
+
     };
     std::vector<FallingChar> fallingChars_;
     int popcornTimer_ = 0; // ポップコーンの弾ける間隔を制御
@@ -236,9 +238,10 @@ private:
     // --- アップデート管理 ---
     bool isCheckingUpdate_ = false;
     bool hasUpdateAvailable_ = false;
-    std::string latestVersion_ = "";
-    std::string updateDownloadUrl_ = "";
+    std::string latestVersion_;
+    std::string updateDownloadUrl_;
     void CheckForUpdateInfo();
+    void DrawRoundedRectUI(float bx, float by, float bw, float bh, float r, Engine::Vector4 c, int layer);
 };
 
 } // namespace Game
