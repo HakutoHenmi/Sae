@@ -566,7 +566,7 @@ void MainScene::Update() {
 				}
 
 				// 音量 SE Vol
-				if (handleSlider(9, panelX + 130.0f, panelY + 1570.0f, 410.0f, 15.0f, seVolume_)) {
+				if (handleSlider(9, panelX + 130.0f, panelY + 1605.0f, 410.0f, 15.0f, seVolume_)) {
 					auto* audio = Engine::Audio::GetInstance();
 					if (audio)
 						audio->SetMasterSEVolume(seVolume_);
@@ -669,6 +669,10 @@ void MainScene::Update() {
 								if (visualMode_ == 1 && i != 3) {
 									continue;
 								}
+								// ブロックモード中はスリングショット（4）を選択不可
+								if (visualMode_ == 2 && i == 4) {
+									continue;
+								}
 								interactionMode_ = i;
 								SaveData();
 								handledMouse = true;
@@ -693,26 +697,14 @@ void MainScene::Update() {
 
 					// Custom Color & New Settings Toggle のクリック判定
 					if (!handledMouse) {
-						// Node Color Toggle
-						if (mx >= panelX + 20.0f && mx <= panelX + 290.0f && my >= panelY + 890.0f && my <= panelY + 915.0f) {
-							useCustomNodeColor_ = !useCustomNodeColor_;
-							SaveData();
-							handledMouse = true;
-						}
-						// Text Color Toggle
-						else if (mx >= panelX + 310.0f && mx <= panelX + 580.0f && my >= panelY + 890.0f && my <= panelY + 915.0f) {
-							useCustomTextColor_ = !useCustomTextColor_;
-							SaveData();
-							handledMouse = true;
-						}
 						// Forced Break Toggle
-						else if (mx >= panelX + 450.0f && mx <= panelX + 570.0f && my >= panelY + 1270.0f && my <= panelY + 1330.0f) {
+						if (mx >= panelX + 450.0f && mx <= panelX + 570.0f && my >= panelY + 1290.0f && my <= panelY + 1340.0f) {
 							isForcedBreakMode_ = !isForcedBreakMode_;
 							SaveData();
 							handledMouse = true;
 						}
 						// Graphics Quality (Low: 0, Medium: 1, High: 2)
-						else if (my >= panelY + 1490.0f && my <= panelY + 1530.0f) {
+						else if (my >= panelY + 1535.0f && my <= panelY + 1585.0f) {
 							if (mx >= panelX + 40.0f && mx <= panelX + 130.0f) {
 								graphicsQuality_ = 0;
 								boids_.resize(100);
@@ -771,7 +763,7 @@ void MainScene::Update() {
 							}
 						}
 						// Reset Window Position
-						else if (mx >= panelX + 50.0f && mx <= panelX + 250.0f && my >= panelY + 1730.0f && my <= panelY + 1775.0f) {
+						else if (mx >= panelX + 40.0f && mx <= panelX + 520.0f && my >= panelY + 1800.0f && my <= panelY + 1845.0f) {
 							HWND hwnd = dx_->GetHwnd();
 							MONITORINFO mi = {sizeof(mi)};
 							GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi);
@@ -840,7 +832,7 @@ void MainScene::Update() {
 							int idx = rand() % emptyBoids.size();
 							const char* healingWords[] = {"安らぎ", "静寂", "癒やし", "ゆらゆら", "ぬくもり", "希望", "優しい気持ち", "深呼吸", "光", "星屑", "まどろみ"};
 							emptyBoids[idx]->customText = healingWords[rand() % 11];
-							emptyBoids[idx]->scale = 4.5f;
+							emptyBoids[idx]->scale = 6.5f;
 							emptyBoids[idx]->textAlpha = 0.0f;
 							emptyBoids[idx]->color = {1.0f, 0.95f, 0.9f, 0.8f};
 						}
@@ -851,10 +843,10 @@ void MainScene::Update() {
 
 				// 右下の All Popcorn ボタンの判定
 				if (!isMascotMode_) {
-					float allPopX = Engine::WindowDX::kW - 180.0f;
-					float allPopY = Engine::WindowDX::kH - 60.0f;
-					float allPopW = 160.0f;
-					float allPopH = 40.0f;
+					float allPopW = 200.0f;
+					float allPopH = 50.0f;
+					float allPopX = Engine::WindowDX::kW - allPopW - 20.0f;
+					float allPopY = Engine::WindowDX::kH / 2.0f - allPopH / 2.0f;
 					if (mx >= allPopX && mx <= allPopX + allPopW && my >= allPopY && my <= allPopY + allPopH) {
 						hoverAllPopUI = true;
 						if (input->IsMouseTrigger(0)) {
@@ -903,7 +895,7 @@ void MainScene::Update() {
 									fc.angle = 0.0f;
 									fc.angularVelocity = ((rand() % 100) - 50) * 0.05f;
 									float textScale = (b.scale > 6.0f) ? 0.5f : 0.4f;
-									fc.scale = textScale + 0.1f;
+									fc.scale = (visualMode_ == 2) ? 0.8f : (textScale + 0.1f);
 									fc.life = 0.0f;
 									fallingChars_.push_back(fc);
 								}
@@ -986,7 +978,7 @@ void MainScene::Update() {
 							fc.angle = 0.0f;
 							fc.angularVelocity = ((rand() % 100) - 50) * 0.05f;
 							float textScale = (b.scale > 6.0f) ? 0.5f : 0.4f;
-							fc.scale = textScale + 0.1f;
+							fc.scale = (visualMode_ == 2) ? 0.8f : (textScale + 0.1f);
 							fc.life = 0.0f;
 							fallingChars_.push_back(fc);
 
@@ -1142,7 +1134,7 @@ void MainScene::Update() {
 			int idx = rand() % emptyBoids.size();
 			const char* healingWords[] = {"安らぎ", "静寂", "癒やし", "ゆらゆら", "ぬくもり", "希望", "優しい気持ち", "深呼吸", "星屑", "光"};
 			emptyBoids[idx]->customText = healingWords[rand() % 10];
-			emptyBoids[idx]->scale = 4.5f;     // 少し大きめに設定して目立たせる
+			emptyBoids[idx]->scale = 6.5f;     // 少し大きめに設定して目立たせる
 			emptyBoids[idx]->textAlpha = 0.0f; // フェードイン開始
 
 			// 地面付近から湧くのを防ぐため、空中のランダムな位置にワープさせる
@@ -1169,10 +1161,26 @@ void MainScene::Update() {
 		gravityExplosionTimer_ -= dt_;
 	}
 
+	// 安全対策：ブロックモード中はスリングショットを使用不可にし、他のモードへ強制変更
+	if (visualMode_ == 2 && interactionMode_ == 4) {
+		interactionMode_ = 0; // Repelへフォールバック
+	}
+
 	// Slingshotモードの更新
 	if (isInteractingFrame && interactionMode_ == 4) {
 		bool isMouseDown = input->IsMouseDown(0);
-		if (isMouseDown && draggedBoidIndex_ == -1) {
+
+		// 現在ドラッグされている FallingChar があるか確認
+		bool hasDraggedChar = false;
+		for (auto& fc : fallingChars_) {
+			if (fc.isDragged) {
+				hasDraggedChar = true;
+				break;
+			}
+		}
+
+		if (isMouseDown && draggedBoidIndex_ == -1 && !hasDraggedChar) {
+			// まずBoids（降ってきた文字）から探す
 			float minDistSq = 400.0f; // 半径20px以内
 			int targetIdx = -1;
 			for (size_t i = 0; i < boids_.size(); ++i) {
@@ -1185,14 +1193,44 @@ void MainScene::Update() {
 					targetIdx = (int)i;
 				}
 			}
+
+			// ブロックモードであれば、fallingChars_（ポップコーンされた文字）からも探す
+			int targetCharIdx = -1;
+			if (targetIdx == -1 && visualMode_ == 2) {
+				float minCharDistSq = 900.0f; // 半径30px以内（少し掴みやすくする）
+				for (size_t i = 0; i < fallingChars_.size(); ++i) {
+					float dx = fallingChars_[i].position.x - mx;
+					float dy = fallingChars_[i].position.y - my;
+					float distSq = dx * dx + dy * dy;
+					float hitRadius = 30.0f;
+					if (distSq < hitRadius * hitRadius && distSq < minCharDistSq) {
+						minCharDistSq = distSq;
+						targetCharIdx = (int)i;
+					}
+				}
+			}
+
 			if (targetIdx != -1) {
 				draggedBoidIndex_ = targetIdx;
 				slingshotStartPos_ = {mx, my};
 				slingshotCurrentPos_ = {mx, my};
+			} else if (targetCharIdx != -1) {
+				fallingChars_[targetCharIdx].isDragged = true;
+				slingshotStartPos_ = {mx, my};
+				slingshotCurrentPos_ = {mx, my};
 			}
-		} else if (isMouseDown && draggedBoidIndex_ != -1) {
+		} else if (isMouseDown && (draggedBoidIndex_ != -1 || hasDraggedChar)) {
 			slingshotCurrentPos_ = {mx, my};
-		} else if (!isMouseDown && draggedBoidIndex_ != -1) {
+			// ドラッグ中の FallingChar の座標をマウス位置に同期
+			if (hasDraggedChar) {
+				for (auto& fc : fallingChars_) {
+					if (fc.isDragged) {
+						fc.position = {mx, my};
+						fc.velocity = {0.0f, 0.0f};
+					}
+				}
+			}
+		} else if (!isMouseDown && (draggedBoidIndex_ != -1 || hasDraggedChar)) {
 			// ドラッグ終了、発射！
 			float sdx = slingshotStartPos_.x - slingshotCurrentPos_.x;
 			float sdy = slingshotStartPos_.y - slingshotCurrentPos_.y;
@@ -1200,11 +1238,23 @@ void MainScene::Update() {
 				boids_[draggedBoidIndex_].velocity.x += sdx * 20.0f;
 				boids_[draggedBoidIndex_].velocity.y += sdy * 20.0f;
 				boids_[draggedBoidIndex_].freeTimer = 2.0f; // 2秒間は群れのルールを無視して吹っ飛ぶ
+			} else if (hasDraggedChar) {
+				for (auto& fc : fallingChars_) {
+					if (fc.isDragged) {
+						// ブロックモードではより大きく反応させるため、発射速度を1.5倍（30.0f）に
+						fc.velocity.x += sdx * 30.0f;
+						fc.velocity.y += sdy * 30.0f;
+						fc.isDragged = false;
+					}
+				}
 			}
 			draggedBoidIndex_ = -1;
 		}
 	} else {
 		draggedBoidIndex_ = -1;
+		for (auto& fc : fallingChars_) {
+			fc.isDragged = false;
+		}
 	}
 
 	// Boidsアルゴリズムの更新
@@ -1512,12 +1562,12 @@ void MainScene::Update() {
 
 			if (b.customText.empty()) {
 				// 文字を持たないノードは衝突せず、ゆっくり落ちてそのまま消える
-				acceleration.y += 200.0f;
+				acceleration.y += 500.0f;
 				b.velocity.x *= 0.98f;
 				b.velocity.y *= 0.98f;
 			} else {
 				// 文字を持つノードのみブロックとして物理演算する
-				acceleration.y += 800.0f; // 重力を少し弱める（反発力とバランスを取るため）
+				acceleration.y += 2000.0f; // 重力を大幅に強化（より重みのある落下挙動に）
 
 				for (auto& other : boids_) {
 					if (&b == &other)
@@ -1637,8 +1687,9 @@ void MainScene::Update() {
 			// モード0: Repel（回避・静寂モード）
 			if (isInteracting && mDistSq < mouseEvadeRadius_ * mouseEvadeRadius_ && mDist > 0.001f) {
 				float force = (mouseEvadeRadius_ - mDist) / mouseEvadeRadius_;
-				acceleration.x += (mdx / mDist) * force * boidSpeed_ * forceMouseEvade_;
-				acceleration.y += (mdy / mDist) * force * boidSpeed_ * forceMouseEvade_;
+				float forceFactor = (visualMode_ == 2) ? 3.0f : 1.0f;
+				acceleration.x += (mdx / mDist) * force * boidSpeed_ * forceMouseEvade_ * forceFactor;
+				acceleration.y += (mdy / mDist) * force * boidSpeed_ * forceMouseEvade_ * forceFactor;
 			}
 		} else if (interactionMode_ == 1) {
 			// モード1: Gravity（引力・吸収モード）
@@ -1648,7 +1699,7 @@ void MainScene::Update() {
 				if (mDist < gravityRadius) {
 					float force = (gravityRadius - mDist) / gravityRadius;
 					// 吸い込み力を大幅にアップ
-					float suckPower = 1200.0f;
+					float suckPower = (visualMode_ == 2) ? 3600.0f : 1200.0f;
 					acceleration.x -= (mdx / mDist) * force * suckPower;
 					acceleration.y -= (mdy / mDist) * force * suckPower;
 				}
@@ -1662,7 +1713,7 @@ void MainScene::Update() {
 				float explodeRadius = 2500.0f;
 				if (eDist > 0.001f && eDist < explodeRadius) {
 					float force = (explodeRadius - eDist) / explodeRadius;
-					float blastPower = 15000.0f * (gravityExplosionTimer_ / 0.5f); // 強力な反発力
+					float blastPower = ((visualMode_ == 2) ? 45000.0f : 15000.0f) * (gravityExplosionTimer_ / 0.5f); // 強力な反発力
 					acceleration.x += (edx / eDist) * force * blastPower;
 					acceleration.y += (edy / eDist) * force * blastPower;
 				}
@@ -1686,7 +1737,7 @@ void MainScene::Update() {
 					float falloff = 1.0f - (rippleRadius_ / 2500.0f);
 					if (falloff < 0.0f)
 						falloff = 0.0f;
-					float blastPower = 2000.0f * falloff;
+					float blastPower = ((visualMode_ == 2) ? 12000.0f : 2000.0f) * falloff;
 
 					acceleration.x += (rdx / rDist) * force * blastPower;
 					acceleration.y += (rdy / rDist) * force * blastPower;
@@ -1773,6 +1824,12 @@ void MainScene::Update() {
 	const float charRadius = 15.0f; // 文字の大雑把な当たり判定半径
 
 	for (auto it = fallingChars_.begin(); it != fallingChars_.end();) {
+		if (it->isDragged) {
+			// ドラッグ中は物理更新をスキップ（Updateで座標を直接更新するため）
+			++it;
+			continue;
+		}
+
 		// アルファのフェードイン（パッと現れる）
 		if (it->color.w < 1.0f) {
 			it->color.w += 4.0f * dt_;
@@ -1789,6 +1846,79 @@ void MainScene::Update() {
 		// 空気抵抗
 		it->velocity.x *= 0.99f;
 		it->velocity.y *= 0.99f;
+
+		// --- マウス干渉処理を追加（ブロックモード限定で大きく反応） ---
+		if (visualMode_ == 2) {
+			float fmdx = it->position.x - mx;
+			float fmdy = it->position.y - my;
+			float fmDistSq = fmdx * fmdx + fmdy * fmdy;
+			float fmDist = sqrtf(fmDistSq);
+
+			bool isInteracting = !isMascotMode_ && !isSettingsOpen_ && !(isForcedBreakMode_ && !isPomodoroWork_);
+
+			Engine::Vector3 fAcc{0, 0, 0};
+
+			if (isInteracting) {
+				if (interactionMode_ == 0) {
+					// Repel（回避・静寂）
+					if (fmDistSq < mouseEvadeRadius_ * mouseEvadeRadius_ && fmDist > 0.001f) {
+						float force = (mouseEvadeRadius_ - fmDist) / mouseEvadeRadius_;
+						float fPower = 6.0f; // 大きく反応するように係数を高めに
+						fAcc.x += (fmdx / fmDist) * force * boidSpeed_ * forceMouseEvade_ * fPower;
+						fAcc.y += (fmdy / fmDist) * force * boidSpeed_ * forceMouseEvade_ * fPower;
+					}
+				} else if (interactionMode_ == 1) {
+					// Gravity（引力・吸収）
+					if (input->IsMouseDown(0) && fmDist > 10.0f) {
+						float gravityRadius = 1500.0f;
+						if (fmDist < gravityRadius) {
+							float force = (gravityRadius - fmDist) / gravityRadius;
+							float suckPower = 6000.0f; // 大きく吸引
+							fAcc.x -= (fmdx / fmDist) * force * suckPower;
+							fAcc.y -= (fmdy / fmDist) * force * suckPower;
+						}
+					}
+					// 爆発力
+					if (gravityExplosionTimer_ > 0.0f) {
+						float edx = it->position.x - gravityExplosionPos_.x;
+						float edy = it->position.y - gravityExplosionPos_.y;
+						float eDistSq = edx * edx + edy * edy;
+						float eDist = sqrtf(eDistSq);
+						float explodeRadius = 2500.0f;
+						if (eDist > 0.001f && eDist < explodeRadius) {
+							float force = (explodeRadius - eDist) / explodeRadius;
+							float blastPower = 35000.0f * (gravityExplosionTimer_ / 0.5f); // 飛びすぎないよう35000.0fに抑制
+							fAcc.x += (edx / eDist) * force * blastPower;
+							fAcc.y += (edy / eDist) * force * blastPower;
+						}
+					}
+				} else if (interactionMode_ == 2) {
+					// Ripple（波紋・衝撃波）
+					if (rippleActive_) {
+						float rdx = it->position.x - ripplePos_.x;
+						float rdy = it->position.y - ripplePos_.y;
+						float rDistSq = rdx * rdx + rdy * rdy;
+						float rDist = sqrtf(rDistSq);
+
+						float distToRing = fabsf(rDist - rippleRadius_);
+						float ringThickness = 120.0f;
+
+						if (rDist > 0.001f && distToRing < ringThickness) {
+							float force = (ringThickness - distToRing) / ringThickness;
+							float falloff = 1.0f - (rippleRadius_ / 2500.0f);
+							if (falloff < 0.0f)
+								falloff = 0.0f;
+							float blastPower = ((visualMode_ == 2) ? 35000.0f : 8000.0f) * falloff; // 波紋の衝撃で大きく飛ばす
+							fAcc.x += (rdx / rDist) * force * blastPower;
+							fAcc.y += (rdy / rDist) * force * blastPower;
+						}
+					}
+				}
+			}
+
+			it->velocity.x += fAcc.x * dt_;
+			it->velocity.y += fAcc.y * dt_;
+		}
 
 		it->position.x += it->velocity.x * dt_;
 		it->position.y += it->velocity.y * dt_;
@@ -1923,7 +2053,7 @@ void MainScene::Update() {
 					int idx = rand() % emptyBoids.size();
 					const char* healingWords[] = {"安らぎ", "静寂", "癒やし", "ゆらゆら", "ぬくもり", "希望", "優しい気持ち", "深呼吸", "光", "星屑", "まどろみ"};
 					emptyBoids[idx]->customText = healingWords[rand() % 11]; // 落ちた破片をきっかけに、新しい単語が湧く
-					emptyBoids[idx]->scale = 4.5f;
+					emptyBoids[idx]->scale = 6.5f;
 					emptyBoids[idx]->textAlpha = 0.0f; // フェードイン開始
 					emptyBoids[idx]->color = it->color;
 
@@ -2222,47 +2352,86 @@ void MainScene::Draw() {
 
 				// 形状による描画の分岐
 				if (currentShapeMode_ == 0) {
-					// 四角 (従来通り)
+					// --- Square (デフォルトの四角) ---
+					// 従来通りのシンプルな塗りつぶし四角形（サイズも元のスケールサイズ）
 					bDesc.x = boids_[i].position.x - bDesc.w / 2.0f;
 					bDesc.y = boids_[i].position.y - bDesc.h / 2.0f;
 					renderer_->DrawSprite(whiteTex_, bDesc);
-				} else if (currentShapeMode_ == 1) {
-					// 柔らかい光の円
-					bDesc.w *= 1.5f;
-					bDesc.h *= 1.5f;
-					bDesc.x = boids_[i].position.x - bDesc.w / 2.0f;
-					bDesc.y = boids_[i].position.y - bDesc.h / 2.0f;
-					renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, bDesc);
-				} else if (currentShapeMode_ == 2) {
-					// ダイヤモンド (45度傾けて縦長に)
-					bDesc.h *= 1.5f;                       // 縦長
-					bDesc.rotationRad += 3.141592f / 4.0f; // +45度
-					bDesc.x = boids_[i].position.x - bDesc.w / 2.0f;
-					bDesc.y = boids_[i].position.y - bDesc.h / 2.0f;
-					renderer_->DrawSprite(whiteTex_, bDesc);
-				} else if (currentShapeMode_ == 3) {
-					// キラキラ星 (十字架の光)
-					Engine::Renderer::SpriteDesc s1 = bDesc;
-					s1.w *= 0.3f;
-					s1.h *= 1.8f;
-					s1.x = boids_[i].position.x - s1.w / 2.0f;
-					s1.y = boids_[i].position.y - s1.h / 2.0f;
-					renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, s1);
+				} else {
+					// 視認性を上げるためサイズを大きくし、デザインを一新
+					float baseSize = std::max(12.0f, (boids_[i].scale > 6.0f ? 14.0f : 12.0f) * (visualMode_ == 3 ? treeZoom_ : 1.0f));
+					bDesc.w = baseSize;
+					bDesc.h = baseSize;
 
-					Engine::Renderer::SpriteDesc s2 = bDesc;
-					s2.w *= 1.8f;
-					s2.h *= 0.3f;
-					s2.x = boids_[i].position.x - s2.w / 2.0f;
-					s2.y = boids_[i].position.y - s2.h / 2.0f;
-					renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, s2);
+					if (currentShapeMode_ == 1) {
+						// --- Circle: 柔らかい光背＋くっきり円の二重サークル ---
+						Engine::Renderer::SpriteDesc glow = bDesc;
+						glow.w *= 2.0f;
+						glow.h *= 2.0f;
+						glow.x = boids_[i].position.x - glow.w / 2.0f;
+						glow.y = boids_[i].position.y - glow.h / 2.0f;
+						glow.color.w *= 0.5f; // 光背はうっすらと
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, glow);
 
-					Engine::Renderer::SpriteDesc s3 = bDesc;
-					s3.w *= 0.5f;
-					s3.h *= 0.5f;
-					s3.x = boids_[i].position.x - s3.w / 2.0f;
-					s3.y = boids_[i].position.y - s3.h / 2.0f;
-					s3.color.w = std::min(1.0f, s3.color.w * 1.5f);
-					renderer_->DrawSprite(whiteTex_, s3);
+						bDesc.x = boids_[i].position.x - bDesc.w / 2.0f;
+						bDesc.y = boids_[i].position.y - bDesc.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, bDesc);
+					} else if (currentShapeMode_ == 2) {
+						// --- Diamond: 枠線付きの美しいひし形 ---
+						bDesc.rotationRad = 3.141592f / 4.0f; // 45度回転
+						bDesc.x = boids_[i].position.x - bDesc.w / 2.0f;
+						bDesc.y = boids_[i].position.y - bDesc.h / 2.0f;
+						renderer_->DrawSprite(whiteTex_, bDesc);
+
+						Engine::Renderer::SpriteDesc inner = bDesc;
+						inner.w = std::max(2.0f, bDesc.w - 3.0f);
+						inner.h = std::max(2.0f, bDesc.h - 3.0f);
+						inner.x = boids_[i].position.x - inner.w / 2.0f;
+						inner.y = boids_[i].position.y - inner.h / 2.0f;
+						inner.color = {0.05f, 0.06f, 0.08f, bDesc.color.w * 0.9f};
+						renderer_->DrawSprite(whiteTex_, inner);
+					} else if (currentShapeMode_ == 3) {
+						// --- Star: 8方向の光線を放つきらめく星 ---
+						// 1. 十字光
+						Engine::Renderer::SpriteDesc cross1 = bDesc;
+						cross1.w = 2.0f;
+						cross1.h = baseSize * 2.5f;
+						cross1.x = boids_[i].position.x - cross1.w / 2.0f;
+						cross1.y = boids_[i].position.y - cross1.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, cross1);
+
+						Engine::Renderer::SpriteDesc cross2 = bDesc;
+						cross2.w = baseSize * 2.5f;
+						cross2.h = 2.0f;
+						cross2.x = boids_[i].position.x - cross2.w / 2.0f;
+						cross2.y = boids_[i].position.y - cross2.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, cross2);
+
+						// 2. 斜め光
+						Engine::Renderer::SpriteDesc diag1 = bDesc;
+						diag1.w = 1.5f;
+						diag1.h = baseSize * 1.5f;
+						diag1.rotationRad = 3.141592f / 4.0f;
+						diag1.x = boids_[i].position.x - diag1.w / 2.0f;
+						diag1.y = boids_[i].position.y - diag1.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, diag1);
+
+						Engine::Renderer::SpriteDesc diag2 = bDesc;
+						diag2.w = baseSize * 1.5f;
+						diag2.h = 1.5f;
+						diag2.rotationRad = 3.141592f / 4.0f;
+						diag2.x = boids_[i].position.x - diag2.w / 2.0f;
+						diag2.y = boids_[i].position.y - diag2.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, diag2);
+
+						// 3. 中心コア
+						Engine::Renderer::SpriteDesc core = bDesc;
+						core.w = baseSize * 0.6f;
+						core.h = baseSize * 0.6f;
+						core.x = boids_[i].position.x - core.w / 2.0f;
+						core.y = boids_[i].position.y - core.h / 2.0f;
+						renderer_->DrawSprite(whiteTex_, core);
+					}
 				}
 
 				if (drawUI) {
@@ -2415,38 +2584,84 @@ void MainScene::Draw() {
 
 				// 形状による描画
 				if (currentShapeMode_ == 0) {
+					// --- Square (デフォルトの四角) ---
+					// 従来通りのシンプルな塗りつぶし四角形（サイズも元のスケールサイズ）
 					renderer_->DrawSprite(whiteTex_, bDesc);
-				} else if (currentShapeMode_ == 1) {
-					bDesc.w *= 1.5f;
-					bDesc.h *= 1.5f;
-					bDesc.x = proj[i].sx - bDesc.w / 2.0f;
-					bDesc.y = proj[i].sy - bDesc.h / 2.0f;
-					renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, bDesc);
-				} else if (currentShapeMode_ == 2) {
-					bDesc.h *= 1.5f;
-					bDesc.rotationRad += 3.141592f / 4.0f;
-					bDesc.x = proj[i].sx - bDesc.w / 2.0f;
-					bDesc.y = proj[i].sy - bDesc.h / 2.0f;
-					renderer_->DrawSprite(whiteTex_, bDesc);
-				} else if (currentShapeMode_ == 3) {
-					Engine::Renderer::SpriteDesc s1 = bDesc;
-					s1.w *= 0.3f;
-					s1.h *= 1.8f;
-					s1.x = proj[i].sx - s1.w / 2.0f;
-					s1.y = proj[i].sy - s1.h / 2.0f;
-					renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, s1);
-					Engine::Renderer::SpriteDesc s2 = bDesc;
-					s2.w *= 1.8f;
-					s2.h *= 0.3f;
-					s2.x = proj[i].sx - s2.w / 2.0f;
-					s2.y = proj[i].sy - s2.h / 2.0f;
-					renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, s2);
-					Engine::Renderer::SpriteDesc s3 = bDesc;
-					s3.w *= 0.6f;
-					s3.h *= 0.6f;
-					s3.x = proj[i].sx - s3.w / 2.0f;
-					s3.y = proj[i].sy - s3.h / 2.0f;
-					renderer_->DrawSprite(whiteTex_, s3);
+				} else {
+					// 視認性を上げるためサイズを大きくし、デザインを一新
+					float baseSize = std::max(12.0f, (boids_[i].scale > 6.0f ? 14.0f : 12.0f) * proj[i].scaleMod * (visualMode_ == 3 ? treeZoom_ : 1.0f));
+					bDesc.w = baseSize;
+					bDesc.h = baseSize;
+
+					if (currentShapeMode_ == 1) {
+						// --- Circle: 輝く光背＋くっきり円の二重サークル ---
+						Engine::Renderer::SpriteDesc glow = bDesc;
+						glow.w *= 2.0f;
+						glow.h *= 2.0f;
+						glow.x = proj[i].sx - glow.w / 2.0f;
+						glow.y = proj[i].sy - glow.h / 2.0f;
+						glow.color.w *= 0.5f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, glow);
+
+						bDesc.x = proj[i].sx - bDesc.w / 2.0f;
+						bDesc.y = proj[i].sy - bDesc.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, bDesc);
+					} else if (currentShapeMode_ == 2) {
+						// --- Diamond: 枠線付きの美しいひし形 ---
+						bDesc.rotationRad = 3.141592f / 4.0f;
+						bDesc.x = proj[i].sx - bDesc.w / 2.0f;
+						bDesc.y = proj[i].sy - bDesc.h / 2.0f;
+						renderer_->DrawSprite(whiteTex_, bDesc);
+
+						Engine::Renderer::SpriteDesc inner = bDesc;
+						inner.w = std::max(2.0f, bDesc.w - 3.0f);
+						inner.h = std::max(2.0f, bDesc.h - 3.0f);
+						inner.x = proj[i].sx - inner.w / 2.0f;
+						inner.y = proj[i].sy - inner.h / 2.0f;
+						inner.color = {0.05f, 0.06f, 0.08f, bDesc.color.w * 0.9f};
+						renderer_->DrawSprite(whiteTex_, inner);
+					} else if (currentShapeMode_ == 3) {
+						// --- Star: 8方向の光線を放つきらめく星 ---
+						// 1. 十字光
+						Engine::Renderer::SpriteDesc cross1 = bDesc;
+						cross1.w = 2.0f;
+						cross1.h = baseSize * 2.5f;
+						cross1.x = proj[i].sx - cross1.w / 2.0f;
+						cross1.y = proj[i].sy - cross1.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, cross1);
+
+						Engine::Renderer::SpriteDesc cross2 = bDesc;
+						cross2.w = baseSize * 2.5f;
+						cross2.h = 2.0f;
+						cross2.x = proj[i].sx - cross2.w / 2.0f;
+						cross2.y = proj[i].sy - cross2.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, cross2);
+
+						// 2. 斜め光
+						Engine::Renderer::SpriteDesc diag1 = bDesc;
+						diag1.w = 1.5f;
+						diag1.h = baseSize * 1.5f;
+						diag1.rotationRad = 3.141592f / 4.0f;
+						diag1.x = proj[i].sx - diag1.w / 2.0f;
+						diag1.y = proj[i].sy - diag1.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, diag1);
+
+						Engine::Renderer::SpriteDesc diag2 = bDesc;
+						diag2.w = baseSize * 1.5f;
+						diag2.h = 1.5f;
+						diag2.rotationRad = 3.141592f / 4.0f;
+						diag2.x = proj[i].sx - diag2.w / 2.0f;
+						diag2.y = proj[i].sy - diag2.h / 2.0f;
+						renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, diag2);
+
+						// 3. 中心コア
+						Engine::Renderer::SpriteDesc core = bDesc;
+						core.w = baseSize * 0.6f;
+						core.h = baseSize * 0.6f;
+						core.x = proj[i].sx - core.w / 2.0f;
+						core.y = proj[i].sy - core.h / 2.0f;
+						renderer_->DrawSprite(whiteTex_, core);
+					}
 				}
 			}
 		}
@@ -2455,7 +2670,14 @@ void MainScene::Draw() {
 		if (drawUI) {
 			float currentZoom = (visualMode_ == 3) ? treeZoom_ : 1.0f;
 			for (const auto& fc : fallingChars_) {
-				renderer_->DrawString(fc.character.c_str(), fc.position.x, fc.position.y, fc.scale * currentZoom, fc.color, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+				Engine::Vector4 col = fc.color;
+				float scale = fc.scale;
+				if (fc.isDragged) {
+					// スリングショットで掴んでいる文字はオレンジ色（明るい発光色）にして、1.5倍の大きさで描画
+					col = {1.0f, 0.5f, 0.1f, 1.0f};
+					scale *= 1.5f;
+				}
+				renderer_->DrawString(fc.character.c_str(), fc.position.x, fc.position.y, scale * currentZoom, col, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			}
 		}
 	}
@@ -2800,24 +3022,20 @@ void MainScene::Draw() {
 
 			// Popcorn All UI Button
 			if (interactionMode_ == 3) {
-				float allPopX = Engine::WindowDX::kW - 180.0f;
-				float allPopY = Engine::WindowDX::kH - 60.0f;
-				float allPopW = 160.0f;
-				float allPopH = 40.0f;
+				float allPopW = 200.0f;
+				float allPopH = 50.0f;
+				float allPopX = Engine::WindowDX::kW - allPopW - 20.0f;
+				float allPopY = Engine::WindowDX::kH / 2.0f - allPopH / 2.0f;
 
 				bool isHover = (mx >= allPopX && mx <= allPopX + allPopW && my >= allPopY && my <= allPopY + allPopH);
 
-				Engine::Renderer::SpriteDesc allPopBgDesc{};
-				allPopBgDesc.x = allPopX;
-				allPopBgDesc.y = allPopY;
-				allPopBgDesc.w = allPopW;
-				allPopBgDesc.h = allPopH;
-				allPopBgDesc.color = isHover ? Engine::Vector4{0.8f, 0.5f, 0.3f, 0.8f} : Engine::Vector4{0.6f, 0.3f, 0.2f, 0.6f};
-				renderer_->DrawSprite(whiteTex_, allPopBgDesc);
+				Engine::Vector4 btnColor = isHover ? Engine::Vector4{0.8f, 0.5f, 0.3f, 0.8f} : Engine::Vector4{0.6f, 0.3f, 0.2f, 0.6f};
+
+				DrawRoundedRectUI(allPopX, allPopY, allPopW, allPopH, 10.0f, btnColor, 102);
 
 				const char* btnText = "Popcorn ALL";
-				float tw = renderer_->MeasureTextWidth(btnText, 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-				renderer_->DrawString(btnText, allPopX + allPopW / 2.0f - tw / 2.0f, allPopY + 10.0f, 0.35f, {1.0f, 0.95f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+				float tw = renderer_->MeasureTextWidth(btnText, 0.4f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+				renderer_->DrawString(btnText, allPopX + allPopW / 2.0f - tw / 2.0f, allPopY + 13.0f, 0.4f, {1.0f, 0.95f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			}
 		}
 
@@ -2922,8 +3140,86 @@ void MainScene::Draw() {
 	}
 }
 
+void MainScene::DrawRoundedRectUI(float bx, float by, float bw, float bh, float r, Engine::Vector4 c, int layer) {
+	float roundedR = roundf(r);
+	if (roundedR < 1.0f) {
+		Engine::Renderer::SpriteDesc sd{};
+		sd.x = bx;
+		sd.y = by;
+		sd.w = bw;
+		sd.h = bh;
+		sd.color = c;
+		sd.layer = layer;
+		renderer_->DrawSprite(whiteTex_, sd);
+		return;
+	}
+
+	Engine::Renderer::SpriteDesc sd{};
+	sd.color = c;
+	sd.layer = layer;
+
+	// 1. 中央の縦長矩形 (左右の角丸幅を除く)
+	sd.x = bx + roundedR;
+	sd.y = by;
+	sd.w = bw - roundedR * 2.0f;
+	sd.h = bh;
+	renderer_->DrawSprite(whiteTex_, sd);
+
+	// 2. 左側の中央矩形 (角丸分を除いた高さ)
+	sd.x = bx;
+	sd.y = by + roundedR;
+	sd.w = roundedR;
+	sd.h = bh - roundedR * 2.0f;
+	renderer_->DrawSprite(whiteTex_, sd);
+
+	// 3. 右側の中央矩形 (角丸分を除いた高さ)
+	sd.x = bx + bw - roundedR;
+	sd.y = by + roundedR;
+	sd.w = roundedR;
+	sd.h = bh - roundedR * 2.0f;
+	renderer_->DrawSprite(whiteTex_, sd);
+
+	// 4. 四隅の角丸の描画 (スキャンラインで円の1/4を描画。高さは正確に 1.0f で走査して重複を防止)
+	auto drawCorner = [&](float cx, float cy, float radius, int cornerType) {
+		float r2 = radius * radius;
+		for (int idy = 0; idy < (int)radius; ++idy) {
+			float dy = (float)idy;
+			float dx = sqrtf(std::max(0.0f, r2 - dy * dy));
+			float drawW = floorf(dx);
+			if (drawW < 1.0f) continue;
+
+			Engine::Renderer::SpriteDesc lineDesc{};
+			lineDesc.h = 1.0f; // 重複のない1px幅
+			lineDesc.color = c;
+			lineDesc.layer = layer;
+			lineDesc.w = drawW;
+
+			if (cornerType == 0) { // 左上
+				lineDesc.x = cx - drawW;
+				lineDesc.y = cy - dy - 1.0f;
+			} else if (cornerType == 1) { // 右上
+				lineDesc.x = cx;
+				lineDesc.y = cy - dy - 1.0f;
+			} else if (cornerType == 2) { // 左下
+				lineDesc.x = cx - drawW;
+				lineDesc.y = cy + dy;
+			} else if (cornerType == 3) { // 右下
+				lineDesc.x = cx;
+				lineDesc.y = cy + dy;
+			}
+			renderer_->DrawSprite(whiteTex_, lineDesc);
+		}
+	};
+
+	drawCorner(bx + roundedR, by + roundedR, roundedR, 0);           // 左上
+	drawCorner(bx + bw - roundedR, by + roundedR, roundedR, 1);      // 右上
+	drawCorner(bx + roundedR, by + bh - roundedR, roundedR, 2);      // 左下
+	drawCorner(bx + bw - roundedR, by + bh - roundedR, roundedR, 3); // 右下
+}
+
 void MainScene::DrawUI() {
 	auto* input = Engine::Input::GetInstance();
+
 	float mx = 0.0f, my = 0.0f;
 	if (input)
 		input->GetMousePos(mx, my);
@@ -3060,7 +3356,7 @@ void MainScene::DrawUI() {
 				Engine::Renderer::SpriteDesc sep{};
 				sep.x = x;
 				sep.y = y + 26.0f;
-				sep.w = 480.0f;
+				sep.w = 520.0f;
 				sep.h = 1.0f;
 				sep.color = {1.0f, 1.0f, 1.0f, 0.08f};
 				sep.layer = 101;
@@ -3090,66 +3386,7 @@ void MainScene::DrawUI() {
 			crossDesc.rotationRad = -3.14159f / 4.0f;
 			renderer_->DrawSprite(whiteTex_, crossDesc);
 
-			// 角丸四角形を描画するラムダ
-			auto drawRoundedRectUI = [&](float bx, float by, float bw, float bh, float r, Engine::Vector4 c, int layer) {
-				Engine::Renderer::SpriteDesc lr{};
-				lr.color = c;
-				lr.layer = layer;
 
-				// 1. 中央の縦長矩形 (上から下まで、左右の角丸幅を除く)
-				lr.x = bx + r;
-				lr.y = by;
-				lr.w = bw - r * 2.0f;
-				lr.h = bh;
-				renderer_->DrawSprite(whiteTex_, lr);
-
-				// 2. 左側の矩形 (角丸分を除いた高さ)
-				lr.x = bx;
-				lr.y = by + r;
-				lr.w = r;
-				lr.h = bh - r * 2.0f;
-				renderer_->DrawSprite(whiteTex_, lr);
-
-				// 3. 右側の矩形 (角丸分を除いた高さ)
-				lr.x = bx + bw - r;
-				lr.y = by + r;
-				lr.w = r;
-				lr.h = bh - r * 2.0f;
-				renderer_->DrawSprite(whiteTex_, lr);
-
-				// 4. 4つの角を1/4円スライスで描画 (重なり防止)
-				auto drawCorner = [&](float cx, float cy, float radius, int cornerType) {
-					float r2 = radius * radius;
-					for (float dy = 0.0f; dy <= radius; dy += 1.0f) {
-						float dx = sqrtf(std::max(0.0f, r2 - dy * dy));
-						Engine::Renderer::SpriteDesc sd{};
-						sd.w = dx;
-						sd.h = 1.5f;
-						sd.color = c;
-						sd.layer = layer;
-
-						if (cornerType == 0) { // 左上
-							sd.x = cx - dx;
-							sd.y = cy - dy - sd.h / 2.0f;
-						} else if (cornerType == 1) { // 右上
-							sd.x = cx;
-							sd.y = cy - dy - sd.h / 2.0f;
-						} else if (cornerType == 2) { // 左下
-							sd.x = cx - dx;
-							sd.y = cy + dy - sd.h / 2.0f;
-						} else if (cornerType == 3) { // 右下
-							sd.x = cx;
-							sd.y = cy + dy - sd.h / 2.0f;
-						}
-						renderer_->DrawSprite(whiteTex_, sd);
-					}
-				};
-
-				drawCorner(bx + r, by + r, r, 0);           // 左上
-				drawCorner(bx + bw - r, by + r, r, 1);      // 右上
-				drawCorner(bx + r, by + bh - r, r, 2);      // 左下
-				drawCorner(bx + bw - r, by + bh - r, r, 3); // 右下
-			};
 
 			// 4つのカラースウォッチを描画
 			for (int i = 0; i < (int)themes_.size(); ++i) {
@@ -3158,11 +3395,11 @@ void MainScene::DrawUI() {
 
 				// 選択中の場合は枠を少し大きめに描画
 				if (i == currentThemeIndex_) {
-					drawRoundedRectUI(sx - 4.0f, sy - 4.0f, 78.0f, 78.0f, 12.0f, {1.0f, 1.0f, 1.0f, 0.8f}, 101);
+					DrawRoundedRectUI(sx - 4.0f, sy - 4.0f, 78.0f, 78.0f, 12.0f, {1.0f, 1.0f, 1.0f, 0.8f}, 101);
 				}
 
 				// スウォッチ本体
-				drawRoundedRectUI(sx, sy, 70.0f, 70.0f, 10.0f, themes_[i].uiWork, 102);
+				DrawRoundedRectUI(sx, sy, 70.0f, 70.0f, 10.0f, themes_[i].uiWork, 102);
 
 				// テーマ名
 				float tw = renderer_->MeasureTextWidth(themes_[i].name.c_str(), 0.3f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
@@ -3186,11 +3423,11 @@ void MainScene::DrawUI() {
 
 				// 選択中の場合は枠を描画
 				if (i == visualMode_) {
-					drawRoundedRectUI(sx - 4.0f, sy - 4.0f, 78.0f, 78.0f, 12.0f, {1.0f, 1.0f, 1.0f, 0.8f}, 101);
+					DrawRoundedRectUI(sx - 4.0f, sy - 4.0f, 78.0f, 78.0f, 12.0f, {1.0f, 1.0f, 1.0f, 0.8f}, 101);
 				}
 
 				// モードボタン本体
-				drawRoundedRectUI(sx, sy, 70.0f, 70.0f, 10.0f, vModeColors[i], 102);
+				DrawRoundedRectUI(sx, sy, 70.0f, 70.0f, 10.0f, vModeColors[i], 102);
 
 				// モード名
 				float tw = renderer_->MeasureTextWidth(vModeNames[i], 0.25f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
@@ -3214,24 +3451,30 @@ void MainScene::DrawUI() {
 				float sy = panelY + 410.0f + (i / 4) * 110.0f;
 
 				// 天球儀モード中はポップコーン以外を暗くする
+				// ブロックモード中はスリングショット（4）を暗くする
 				Engine::Vector4 color = modeColors[i];
 				float textAlpha = 1.0f;
 				if (visualMode_ == 1 && i != 3) {
+					color = {0.3f, 0.3f, 0.3f, 0.5f}; // 暗いグレー
+					textAlpha = 0.3f;
+				} else if (visualMode_ == 2 && i == 4) {
 					color = {0.3f, 0.3f, 0.3f, 0.5f}; // 暗いグレー
 					textAlpha = 0.3f;
 				}
 
 				// 選択中の場合は枠を描画
 				if (i == interactionMode_) {
-					drawRoundedRectUI(sx - 4.0f, sy - 4.0f, 78.0f, 78.0f, 12.0f, {1.0f, 1.0f, 1.0f, 0.8f}, 101);
+					DrawRoundedRectUI(sx - 4.0f, sy - 4.0f, 78.0f, 78.0f, 12.0f, {1.0f, 1.0f, 1.0f, 0.8f}, 101);
 				}
 
 				// モードボタン本体
-				drawRoundedRectUI(sx, sy, 70.0f, 70.0f, 10.0f, color, 102);
+				DrawRoundedRectUI(sx, sy, 70.0f, 70.0f, 10.0f, color, 102);
 
 				// モードごとの簡易アイコン（図形）
 				Engine::Vector4 iconCol = {1.0f, 1.0f, 1.0f, 0.9f};
 				if (visualMode_ == 1 && i != 3) {
+					iconCol.w = 0.3f; // アイコンも半透明に
+				} else if (visualMode_ == 2 && i == 4) {
 					iconCol.w = 0.3f; // アイコンも半透明に
 				}
 
@@ -3321,11 +3564,11 @@ void MainScene::DrawUI() {
 
 				// 選択中の場合は枠を描画
 				if (i == currentShapeMode_) {
-					drawRoundedRectUI(sx - 4.0f, sy - 4.0f, 78.0f, 78.0f, 12.0f, {1.0f, 1.0f, 1.0f, 0.8f}, 101);
+					DrawRoundedRectUI(sx - 4.0f, sy - 4.0f, 78.0f, 78.0f, 12.0f, {1.0f, 1.0f, 1.0f, 0.8f}, 101);
 				}
 
 				// モードボタン本体（色はグレー系）
-				drawRoundedRectUI(sx, sy, 70.0f, 70.0f, 10.0f, {0.3f, 0.3f, 0.35f, 1.0f}, 102);
+				DrawRoundedRectUI(sx, sy, 70.0f, 70.0f, 10.0f, {0.3f, 0.3f, 0.35f, 1.0f}, 102);
 
 				// アイコン描画
 				Engine::Renderer::SpriteDesc bDesc{};
@@ -3390,7 +3633,7 @@ void MainScene::DrawUI() {
 				float swH = 20.0f;
 				bool isHover = (mx >= tx && mx <= tx + 200.0f && my >= ty && my <= ty + 40.0f);
 				Engine::Vector4 trackColor = enabled ? color : (isHover ? Engine::Vector4{0.25f, 0.25f, 0.3f, 1.0f} : Engine::Vector4{0.15f, 0.15f, 0.18f, 1.0f});
-				drawRoundedRectUI(swX, swY, swW, swH, 10.0f, trackColor, 102);
+				DrawRoundedRectUI(swX, swY, swW, swH, 10.0f, trackColor, 102);
 
 				Engine::Renderer::SpriteDesc handle{};
 				handle.w = 14.0f;
@@ -3402,7 +3645,7 @@ void MainScene::DrawUI() {
 				renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, handle);
 			};
 
-			auto drawCard = [&](float cx, float cy, float cw, float ch) { drawRoundedRectUI(cx, cy, cw, ch, 10.0f, {0.15f, 0.15f, 0.2f, 0.8f}, 101); };
+			auto drawCard = [&](float cx, float cy, float cw, float ch) { DrawRoundedRectUI(cx, cy, cw, ch, 10.0f, {0.15f, 0.15f, 0.2f, 0.8f}, 101); };
 
 			auto drawSlider = [&](float sx, float sy, float trackW, const char* label, float val, Engine::Vector4 col, const char* valStr = nullptr) {
 				if (label && label[0] != '\0') {
@@ -3414,9 +3657,9 @@ void MainScene::DrawUI() {
 				float trackY = sy + 1.0f;
 				bool isHover = (mx >= sx - 10.0f && mx <= sx + trackW + 10.0f && my >= sy - 15.0f && my <= sy + 25.0f);
 
-				drawRoundedRectUI(sx, trackY, trackW, trackH, 5.0f, {0.2f, 0.2f, 0.25f, 1.0f}, 102);
+				DrawRoundedRectUI(sx, trackY, trackW, trackH, 5.0f, {0.2f, 0.2f, 0.25f, 1.0f}, 102);
 				if (val > 0.0f) {
-					drawRoundedRectUI(sx, trackY, val * trackW, trackH, 5.0f, col, 103);
+					DrawRoundedRectUI(sx, trackY, val * trackW, trackH, 5.0f, col, 103);
 				}
 
 				Engine::Renderer::SpriteDesc handle{};
@@ -3430,7 +3673,7 @@ void MainScene::DrawUI() {
 				renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, handle);
 
 				if (valStr) {
-					renderer_->DrawString(valStr, sx + trackW + 15.0f, sy - 2.0f, 0.25f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+					renderer_->DrawString(valStr, sx + trackW + 18.0f, sy - 2.0f, 0.25f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 				}
 			};
 
@@ -3441,84 +3684,76 @@ void MainScene::DrawUI() {
 
 			// Node Color Card
 			float ncX = panelX + 25.0f;
-			float ncY = panelY + 890.0f;
-			drawCard(ncX, ncY, 280.0f, 190.0f);
-			renderer_->DrawString("NODE COLOR", ncX + 10.0f, ncY + 10.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			float ncY = panelY + 885.0f;
+			drawCard(ncX, ncY, 280.0f, 200.0f);
+			renderer_->DrawString("NODE COLOR", ncX + 10.0f, ncY + 12.0f, 0.30f, {0.6f, 0.65f, 0.7f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
 			Engine::Renderer::SpriteDesc nPrev{};
 			nPrev.x = ncX + 15.0f;
 			nPrev.y = ncY + 50.0f;
 			nPrev.w = 60.0f;
 			nPrev.h = 60.0f;
-			nPrev.color = useCustomNodeColor_ ? Engine::Vector4{customNodeColor_.x, customNodeColor_.y, customNodeColor_.z, 1.0f} : Engine::Vector4{0.3f, 0.3f, 0.3f, 1.0f};
+			nPrev.color = Engine::Vector4{customNodeColor_.x, customNodeColor_.y, customNodeColor_.z, 1.0f};
 			nPrev.layer = 102;
 			renderer_->DrawSprite(whiteTex_, nPrev);
-			renderer_->DrawString("ノードカラー", ncX + 10.0f, ncY + 140.0f, 0.3f, {0.6f, 0.6f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString("ノードカラー", ncX + 10.0f, ncY + 152.0f, 0.28f, {0.5f, 0.55f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
-			if (useCustomNodeColor_) {
-				snprintf(rStr, sizeof(rStr), "%d", (int)(customNodeColor_.x * 255));
-				snprintf(gStr, sizeof(gStr), "%d", (int)(customNodeColor_.y * 255));
-				snprintf(bStr, sizeof(bStr), "%d", (int)(customNodeColor_.z * 255));
-				drawSlider(panelX + 140.0f, panelY + 940.0f, 110.0f, "R", customNodeColor_.x, {1.0f, 0.3f, 0.3f, 1.0f}, rStr);
-				drawSlider(panelX + 140.0f, panelY + 980.0f, 110.0f, "G", customNodeColor_.y, {0.3f, 1.0f, 0.3f, 1.0f}, gStr);
-				drawSlider(panelX + 140.0f, panelY + 1020.0f, 110.0f, "B", customNodeColor_.z, {0.3f, 0.3f, 1.0f, 1.0f}, bStr);
-			} else {
-				renderer_->DrawString("Enabled by Theme", panelX + 140.0f, panelY + 980.0f, 0.3f, {0.5f, 0.5f, 0.5f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-			}
+			snprintf(rStr, sizeof(rStr), "%d", (int)(customNodeColor_.x * 255));
+			snprintf(gStr, sizeof(gStr), "%d", (int)(customNodeColor_.y * 255));
+			snprintf(bStr, sizeof(bStr), "%d", (int)(customNodeColor_.z * 255));
+			drawSlider(panelX + 140.0f, panelY + 935.0f, 100.0f, "R", customNodeColor_.x, {1.0f, 0.3f, 0.3f, 1.0f}, rStr);
+			drawSlider(panelX + 140.0f, panelY + 975.0f, 100.0f, "G", customNodeColor_.y, {0.3f, 1.0f, 0.3f, 1.0f}, gStr);
+			drawSlider(panelX + 140.0f, panelY + 1015.0f, 100.0f, "B", customNodeColor_.z, {0.3f, 0.3f, 1.0f, 1.0f}, bStr);
 
 			// Text Color Card
 			float tcX = panelX + 315.0f;
-			float tcY = panelY + 890.0f;
-			drawCard(tcX, tcY, 280.0f, 190.0f);
-			renderer_->DrawString("TEXT COLOR", tcX + 10.0f, tcY + 10.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			float tcY = panelY + 885.0f;
+			drawCard(tcX, tcY, 280.0f, 200.0f);
+			renderer_->DrawString("TEXT COLOR", tcX + 10.0f, tcY + 12.0f, 0.30f, {0.6f, 0.65f, 0.7f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
 			Engine::Renderer::SpriteDesc tPrev{};
 			tPrev.x = tcX + 15.0f;
 			tPrev.y = tcY + 50.0f;
 			tPrev.w = 60.0f;
 			tPrev.h = 60.0f;
-			tPrev.color = useCustomTextColor_ ? Engine::Vector4{customTextColor_.x, customTextColor_.y, customTextColor_.z, 1.0f} : Engine::Vector4{0.3f, 0.3f, 0.3f, 1.0f};
+			tPrev.color = Engine::Vector4{customTextColor_.x, customTextColor_.y, customTextColor_.z, 1.0f};
 			tPrev.layer = 102;
 			renderer_->DrawSprite(whiteTex_, tPrev);
-			renderer_->DrawString("テキストカラー", tcX + 10.0f, tcY + 140.0f, 0.3f, {0.6f, 0.6f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString("テキストカラー", tcX + 10.0f, tcY + 152.0f, 0.28f, {0.5f, 0.55f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
-			if (useCustomTextColor_) {
-				snprintf(rStr, sizeof(rStr), "%d", (int)(customTextColor_.x * 255));
-				snprintf(gStr, sizeof(gStr), "%d", (int)(customTextColor_.y * 255));
-				snprintf(bStr, sizeof(bStr), "%d", (int)(customTextColor_.z * 255));
-				drawSlider(panelX + 440.0f, panelY + 940.0f, 110.0f, "R", customTextColor_.x, {1.0f, 0.3f, 0.3f, 1.0f}, rStr);
-				drawSlider(panelX + 440.0f, panelY + 980.0f, 110.0f, "G", customTextColor_.y, {0.3f, 1.0f, 0.3f, 1.0f}, gStr);
-				drawSlider(panelX + 440.0f, panelY + 1020.0f, 110.0f, "B", customTextColor_.z, {0.3f, 0.3f, 1.0f, 1.0f}, bStr);
-			} else {
-				renderer_->DrawString("Enabled by Theme", panelX + 440.0f, panelY + 980.0f, 0.3f, {0.5f, 0.5f, 0.5f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-			}
+			snprintf(rStr, sizeof(rStr), "%d", (int)(customTextColor_.x * 255));
+			snprintf(gStr, sizeof(gStr), "%d", (int)(customTextColor_.y * 255));
+			snprintf(bStr, sizeof(bStr), "%d", (int)(customTextColor_.z * 255));
+			drawSlider(panelX + 430.0f, panelY + 935.0f, 100.0f, "R", customTextColor_.x, {1.0f, 0.3f, 0.3f, 1.0f}, rStr);
+			drawSlider(panelX + 430.0f, panelY + 975.0f, 100.0f, "G", customTextColor_.y, {0.3f, 1.0f, 0.3f, 1.0f}, gStr);
+			drawSlider(panelX + 430.0f, panelY + 1015.0f, 100.0f, "B", customTextColor_.z, {0.3f, 0.3f, 1.0f, 1.0f}, bStr);
 
 			// --- POMODORO CONFIGURATION ---
-			drawSectionHeader(panelX + 20.0f, panelY + 1150.0f, "POMODORO CONFIGURATION");
-			float pcY = panelY + 1200.0f;
+			drawSectionHeader(panelX + 20.0f, panelY + 1165.0f, "POMODORO CONFIGURATION");
+			float pcY = panelY + 1210.0f;
 			drawCard(panelX + 20.0f, pcY, 560.0f, 150.0f);
 
 			float workProgress = (pWorkDurationMinutes_ - 10.0f) / 90.0f;
-			renderer_->DrawString("Focus:", panelX + 40.0f, pcY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString("Focus:", panelX + 40.0f, pcY + 18.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			char workValStr[16];
 			snprintf(workValStr, sizeof(workValStr), "%d min", (int)pWorkDurationMinutes_);
-			renderer_->DrawString(workValStr, panelX + 110.0f, pcY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString(workValStr, panelX + 110.0f, pcY + 18.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			drawSlider(panelX + 40.0f, panelY + 1260.0f, 220.0f, "", workProgress, themes_[currentThemeIndex_].uiWork);
 
 			float relaxProgress = (pRelaxDurationMinutes_ - 1.0f) / 59.0f;
-			renderer_->DrawString("Relax:", panelX + 320.0f, pcY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString("Relax:", panelX + 320.0f, pcY + 18.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			char relaxValStr[16];
 			snprintf(relaxValStr, sizeof(relaxValStr), "%d min", (int)pRelaxDurationMinutes_);
-			renderer_->DrawString(relaxValStr, panelX + 390.0f, pcY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString(relaxValStr, panelX + 390.0f, pcY + 18.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			drawSlider(panelX + 320.0f, panelY + 1260.0f, 220.0f, "", relaxProgress, themes_[currentThemeIndex_].uiRelax);
 
-			renderer_->DrawString("Forced Break", panelX + 40.0f, panelY + 1305.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-			renderer_->DrawString("ON", panelX + 450.0f, panelY + 1305.0f, 0.35f, {0.8f, 0.8f, 0.8f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString("Forced Break", panelX + 40.0f, panelY + 1315.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString("ON", panelX + 450.0f, panelY + 1315.0f, 0.35f, {0.8f, 0.8f, 0.8f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			float swX = panelX + 490.0f;
-			float swY = panelY + 1302.0f;
+			float swY = panelY + 1312.0f;
 			float swW = 50.0f;
 			float swH = 24.0f;
-			drawRoundedRectUI(swX, swY, swW, swH, 12.0f, isForcedBreakMode_ ? Engine::Vector4{0.3f, 0.8f, 0.4f, 1.0f} : Engine::Vector4{0.3f, 0.3f, 0.35f, 1.0f}, 102);
+			DrawRoundedRectUI(swX, swY, swW, swH, 12.0f, isForcedBreakMode_ ? Engine::Vector4{0.3f, 0.8f, 0.4f, 1.0f} : Engine::Vector4{0.3f, 0.3f, 0.35f, 1.0f}, 102);
 			Engine::Renderer::SpriteDesc fbh{};
 			fbh.w = 18.0f;
 			fbh.h = 18.0f;
@@ -3529,8 +3764,8 @@ void MainScene::DrawUI() {
 			renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, fbh);
 
 			// --- 環境設定 (画質と音量) ---
-			drawSectionHeader(panelX + 20.0f, panelY + 1390.0f, "GRAPHICS & SOUND SETTINGS");
-			float gsY = panelY + 1440.0f;
+			drawSectionHeader(panelX + 20.0f, panelY + 1440.0f, "GRAPHICS & SOUND SETTINGS");
+			float gsY = panelY + 1485.0f;
 			drawCard(panelX + 20.0f, gsY, 560.0f, 170.0f);
 
 			// Graphics Quality
@@ -3542,7 +3777,7 @@ void MainScene::DrawUI() {
 				bool isSel = (graphicsQuality_ == i);
 				bool isHover = (mx >= qx && mx <= qx + 90.0f && my >= qy && my <= qy + 40.0f);
 				Engine::Vector4 btnCol = isSel ? Engine::Vector4{0.2f, 0.5f, 0.9f, 1.0f} : (isHover ? Engine::Vector4{0.2f, 0.2f, 0.25f, 1.0f} : Engine::Vector4{0.15f, 0.15f, 0.18f, 1.0f});
-				drawRoundedRectUI(qx, qy, 90.0f, 40.0f, 8.0f, btnCol, 102);
+				DrawRoundedRectUI(qx, qy, 90.0f, 40.0f, 8.0f, btnCol, 102);
 				float tw = renderer_->MeasureTextWidth(qualityNames[i], 0.3f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 				renderer_->DrawString(
 				    qualityNames[i], qx + 45.0f - tw / 2.0f, qy + 12.0f, 0.3f, isSel ? Engine::Vector4{1, 1, 1, 1} : Engine::Vector4{0.7f, 0.7f, 0.75f, 1},
@@ -3550,18 +3785,21 @@ void MainScene::DrawUI() {
 			}
 
 			// Audio Volume Sliders
-			drawSlider(panelX + 130.0f, gsY + 130.0f, 410.0f, "SE Vol", seVolume_, {0.3f, 0.7f, 0.9f, 1.0f});
+			drawSlider(panelX + 130.0f, gsY + 120.0f, 410.0f, "SE Vol", seVolume_, {0.3f, 0.7f, 0.9f, 1.0f});
 
 			// --- ディスプレイ設定 ---
-			drawSectionHeader(panelX + 20.0f, panelY + 1680.0f, "Display settings");
+			drawSectionHeader(panelX + 20.0f, panelY + 1735.0f, "Display settings");
 
-			// Window Reset Button
-			float rx = panelX + 50.0f;
-			float ry = panelY + 1730.0f;
-			float rw = 250.0f;
+			// Window Reset Button Card
+			float dsY = panelY + 1780.0f;
+			drawCard(panelX + 20.0f, dsY, 560.0f, 85.0f);
+
+			float rx = panelX + 40.0f;
+			float ry = dsY + 20.0f;
+			float rw = 480.0f;
 			float rh = 45.0f;
 			bool rHover = (mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh);
-			drawRoundedRectUI(rx, ry, rw, rh, 8.0f, rHover ? Engine::Vector4{0.4f, 0.4f, 0.45f, 1.0f} : Engine::Vector4{0.25f, 0.25f, 0.3f, 1.0f}, 102);
+			DrawRoundedRectUI(rx, ry, rw, rh, 8.0f, rHover ? Engine::Vector4{0.4f, 0.4f, 0.45f, 1.0f} : Engine::Vector4{0.25f, 0.25f, 0.3f, 1.0f}, 102);
 			const char* btnStr = "Reset Window Position";
 			float rtw = renderer_->MeasureTextWidth(btnStr, 0.3f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(btnStr, rx + rw / 2.0f - rtw / 2.0f, ry + 12.0f, 0.3f, {1, 1, 1, 0.9f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
@@ -3761,20 +3999,13 @@ void MainScene::DrawUI() {
 	}
 
 	// --- アップデート通知ダイアログ ---
-	if (hasUpdateAvailable_ && !isMascotMode_) {
-		float updW = 320.0f;
+	if (hasUpdateAvailable_ && !isMascotMode_ && !isSettingsOpen_) {
+		float updW = 360.0f;
 		float updH = 120.0f;
 		float updX = Engine::WindowDX::kW - updW - 20.0f;
-		float updY = Engine::WindowDX::kH - updH - 60.0f; // バージョン表記のさらに上
+		float updY = 100.0f;
 
-		Engine::Renderer::SpriteDesc uBg{};
-		uBg.x = updX;
-		uBg.y = updY;
-		uBg.w = updW;
-		uBg.h = updH;
-		uBg.color = {0.1f, 0.12f, 0.15f, 0.95f};
-		uBg.layer = 200;
-		renderer_->DrawSprite(roundedRectTex_ ? roundedRectTex_ : whiteTex_, uBg);
+		DrawRoundedRectUI(updX, updY, updW, updH, 12.0f, {0.1f, 0.12f, 0.15f, 0.95f}, 200);
 
 		renderer_->DrawString("新しいバージョンがあります！", updX + 20.0f, updY + 15.0f, 0.4f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 		std::string verMsg = std::string(APP_VERSION) + " -> " + latestVersion_;
@@ -3787,29 +4018,20 @@ void MainScene::DrawUI() {
 		float btnY = updY + updH - btnH - 15.0f;
 		bool isHover = (mx >= btnX && mx <= btnX + btnW && my >= btnY && my <= btnY + btnH);
 
-		Engine::Renderer::SpriteDesc bBg{};
-		bBg.x = btnX;
-		bBg.y = btnY;
-		bBg.w = btnW;
-		bBg.h = btnH;
-		bBg.color = isHover ? Engine::Vector4{0.2f, 0.6f, 0.9f, 1.0f} : Engine::Vector4{0.15f, 0.4f, 0.7f, 1.0f};
-		bBg.layer = 201;
-		renderer_->DrawSprite(roundedRectTex_ ? roundedRectTex_ : whiteTex_, bBg);
+		DrawRoundedRectUI(btnX, btnY, btnW, btnH, 8.0f, isHover ? Engine::Vector4{0.2f, 0.6f, 0.9f, 1.0f} : Engine::Vector4{0.15f, 0.4f, 0.7f, 1.0f}, 201);
 
 		float tw = renderer_->MeasureTextWidth("更新する", 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 		renderer_->DrawString("更新する", btnX + btnW / 2.0f - tw / 2.0f, btnY + 5.0f, 0.35f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
 		if (isHover && input->IsMouseTrigger(0)) {
-			// Updater.exe を起動して自身は終了
-			// updateDownloadUrl_ を引数で渡すなど
 			std::string cmdArgs = updateDownloadUrl_;
 			ShellExecuteA(NULL, "open", "Updater.exe", cmdArgs.c_str(), NULL, SW_SHOW);
 			PostMessage(dx_->GetHwnd(), WM_CLOSE, 0, 0); // 安全に終了
 		}
 
 		// 閉じるボタン（×）
-		float closeX = updX + updW - 25.0f;
-		float closeY = updY + 5.0f;
+		float closeX = updX + updW - 30.0f;
+		float closeY = updY + 12.0f;
 		bool cHover = (mx >= closeX && mx <= closeX + 20.0f && my >= closeY && my <= closeY + 20.0f);
 		renderer_->DrawString("x", closeX, closeY, 0.4f, cHover ? Engine::Vector4{1, 1, 1, 1} : Engine::Vector4{0.5f, 0.5f, 0.5f, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 		if (cHover && input->IsMouseTrigger(0)) {
@@ -3842,6 +4064,18 @@ void MainScene::DrawUI() {
 			bg.layer = 140;
 			renderer_->DrawSprite(whiteTex_, bg);
 
+			// 閉じるボタン（×）
+			float closeX = 250.0f - 25.0f;
+			float closeY = 5.0f;
+			bool cHover = (mx >= closeX && mx <= closeX + 20.0f && my >= closeY && my <= closeY + 20.0f);
+			renderer_->DrawString("x", closeX, closeY, 0.4f, cHover ? Engine::Vector4{1, 1, 1, 1} : Engine::Vector4{0.5f, 0.5f, 0.5f, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			if (cHover && input->IsMouseTrigger(0)) {
+				// 強制休憩をスキップして作業状態に戻る
+				isPomodoroWork_ = true;
+				pomodoroTimer_ = 0.0f;
+				SaveData();
+			}
+
 			const char* title = "休憩時間です";
 			float tw = renderer_->MeasureTextWidth(title, 0.5f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(title, 125.0f - tw / 2.0f, 90.0f, 0.5f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
@@ -3867,12 +4101,12 @@ void MainScene::DrawUI() {
 			float tw = renderer_->MeasureTextWidth(title, 1.2f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(title, Engine::WindowDX::kW / 2.0f - tw / 2.0f, Engine::WindowDX::kH / 2.0f - 140.0f, 1.2f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
-			const char* sub = "作業時間が終了しました。画面から目を離し、リフレッシュしてください。";
+			const char* sub = "作業時間が終了しました　画面から目を離し　リフレッシュしてください";
 			float sw = renderer_->MeasureTextWidth(sub, 0.45f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(
 			    sub, Engine::WindowDX::kW / 2.0f - sw / 2.0f, Engine::WindowDX::kH / 2.0f - 70.0f, 0.45f, {0.7f, 0.7f, 0.8f, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
-			const char* sub2 = "ゆっくりと深呼吸をして、心と体を休めましょう。";
+			const char* sub2 = "ゆっくりと深呼吸をして　心と体を休めましょう";
 			float sw2 = renderer_->MeasureTextWidth(sub2, 0.45f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(
 			    sub2, Engine::WindowDX::kW / 2.0f - sw2 / 2.0f, Engine::WindowDX::kH / 2.0f - 30.0f, 0.45f, {0.7f, 0.7f, 0.8f, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
