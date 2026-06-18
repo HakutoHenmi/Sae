@@ -20,7 +20,7 @@
 #include "../../Engine/ThirdParty/nlohmann/json.hpp"
 using json = nlohmann::json;
 
-#define APP_VERSION "Beta v0.1.2"
+#define APP_VERSION "Beta v0.1.3"
 
 namespace Game {
 
@@ -3186,7 +3186,8 @@ void MainScene::DrawRoundedRectUI(float bx, float by, float bw, float bh, float 
 			float dy = (float)idy;
 			float dx = sqrtf(std::max(0.0f, r2 - dy * dy));
 			float drawW = floorf(dx);
-			if (drawW < 1.0f) continue;
+			if (drawW < 1.0f)
+				continue;
 
 			Engine::Renderer::SpriteDesc lineDesc{};
 			lineDesc.h = 1.0f; // 重複のない1px幅
@@ -3385,8 +3386,6 @@ void MainScene::DrawUI() {
 			// Line 2: (backslash)
 			crossDesc.rotationRad = -3.14159f / 4.0f;
 			renderer_->DrawSprite(whiteTex_, crossDesc);
-
-
 
 			// 4つのカラースウォッチを描画
 			for (int i = 0; i < (int)themes_.size(); ++i) {
