@@ -153,6 +153,7 @@ private:
     int graphicsQuality_ = 1;             // 0: Low, 1: Medium, 2: High
     float bgmVolume_ = 0.5f;              // BGMマスター音量
     float seVolume_ = 0.5f;               // SEマスター音量
+    int language_ = 0;                    // 0: Japanese, 1: English
     
     // --- 追加: 文字落下によるノード増加を制御するエネルギーゲージ ---
     float stardustEnergy_ = 0.0f;
