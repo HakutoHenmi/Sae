@@ -14,6 +14,7 @@ namespace Updater
         static Form? mainForm;
         static Label? statusLabel;
         static ProgressBar? progressBar;
+        static int language = 0; // 0: JP, 1: EN
 
         [STAThread]
         static void Main(string[] args)
@@ -27,6 +28,10 @@ namespace Updater
             }
 
             string downloadUrl = args[0];
+            if (args.Length > 1 && int.TryParse(args[1], out int lang))
+            {
+                language = lang;
+            }
 
             mainForm = new Form
             {
@@ -42,7 +47,7 @@ namespace Updater
 
             statusLabel = new Label
             {
-                Text = "Sae の終了を待機しています...",
+                Text = language == 1 ? "Waiting for Sae to close..." : "Sae の終了を待機しています...",
                 Location = new Point(25, 25),
                 Size = new Size(350, 30),
                 Font = new Font("MS Gothic", 10, FontStyle.Regular),
@@ -71,7 +76,8 @@ namespace Updater
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("アップデート中にエラーが発生しました:\n" + ex.Message, "Sae Updater", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    string errorMsg = language == 1 ? "An error occurred during the update:\n" : "アップデート中にエラーが発生しました:\n";
+                    MessageBox.Show(errorMsg + ex.Message, "Sae Updater", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     mainForm.Close();
                 }
             };
@@ -85,7 +91,7 @@ namespace Updater
             const string targetProcessName = "Sae";
 
             // 1. プロセス終了待機
-            UpdateStatus("Sae の終了を待機しています...", 10);
+            UpdateStatus(language == 1 ? "Waiting for Sae to close..." : "Sae の終了を待機しています...", 10);
             int retries = 30;
             while (retries > 0)
             {
@@ -114,7 +120,7 @@ namespace Updater
             }
 
             // 2. ダウンロード
-            UpdateStatus("アップデートをダウンロードしています...", 20);
+            UpdateStatus(language == 1 ? "Downloading update..." : "アップデートをダウンロードしています...", 20);
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", "Sae Updater/1.0");
@@ -136,7 +142,8 @@ namespace Updater
                             if (contentLength.HasValue)
                             {
                                 int percentage = 20 + (int)((double)totalRead / contentLength.Value * 50); // ダウンロードは 20%〜70%
-                                UpdateStatus($"アップデートをダウンロードしています... ({totalRead / 1024 / 1024}MB / {contentLength.Value / 1024 / 1024}MB)", percentage);
+                                string dlMsg = language == 1 ? "Downloading update..." : "アップデートをダウンロードしています...";
+                                UpdateStatus($"{dlMsg} ({totalRead / 1024 / 1024}MB / {contentLength.Value / 1024 / 1024}MB)", percentage);
                             }
                         }
                     }
@@ -144,7 +151,7 @@ namespace Updater
             }
 
             // 3. 解凍・上書き
-            UpdateStatus("ファイルを展開し、上書きしています...", 75);
+            UpdateStatus(language == 1 ? "Extracting and overwriting files..." : "ファイルを展開し、上書きしています...", 75);
             using (var archive = ZipFile.OpenRead(zipPath))
             {
                 int totalEntries = archive.Entries.Count;
@@ -179,19 +186,20 @@ namespace Updater
                     entry.ExtractToFile(destPath, true);
 
                     int percentage = 75 + (int)((double)currentEntry / totalEntries * 20); // 展開は 75%〜95%
-                    UpdateStatus($"ファイルを展開しています... ({currentEntry}/{totalEntries})", percentage);
+                    string extMsg = language == 1 ? "Extracting files..." : "ファイルを展開しています...";
+                    UpdateStatus($"{extMsg} ({currentEntry}/{totalEntries})", percentage);
                 }
             }
 
             // 4. ゴミ掃除
-            UpdateStatus("後片付けを行っています...", 95);
+            UpdateStatus(language == 1 ? "Cleaning up..." : "後片付けを行っています...", 95);
             if (File.Exists(zipPath))
             {
                 File.Delete(zipPath);
             }
 
             // 5. 本体再起動の合図
-            UpdateStatus("アップデート完了！アプリを再起動します...", 100);
+            UpdateStatus(language == 1 ? "Update complete! Restarting the app..." : "アップデート完了！アプリを再起動します...", 100);
             await Task.Delay(1200);
 
             // 6. 本体再起動

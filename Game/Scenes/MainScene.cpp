@@ -19,8 +19,9 @@
 
 #include "../../Engine/ThirdParty/nlohmann/json.hpp"
 using json = nlohmann::json;
+#include <shlobj.h> // For SHGetFolderPathA
 
-#define APP_VERSION "Beta v0.1.3"
+#define APP_VERSION "v1.0.0"
 
 namespace Game {
 
@@ -176,13 +177,7 @@ void MainScene::Initialize(Engine::WindowDX* dx, const Engine::SceneParameters& 
 	audioCapture_ = std::make_unique<AudioLoopbackCapture>();
 	audioCapture_->Initialize();
 
-	auto* audio = Engine::Audio::GetInstance();
-	if (audio) {
-		soundSend_ = audio->Load("Assets/Sounds/send.wav");
-		soundZen_ = audio->Load("Assets/Sounds/zen_mode.wav");
-		soundFocus_ = audio->Load("Assets/Sounds/focus_finish.wav");
-		soundHit_ = audio->Load("Assets/Sounds/hit.wav");
-	}
+	// Audio is disabled
 
 	// 起動時にアップデートを確認
 	CheckForUpdateInfo();
@@ -211,8 +206,6 @@ void MainScene::Update() {
 			isPomodoroWork_ = !isPomodoroWork_;
 			// セッション終了時（集中完了時）にセーブ
 			SaveData();
-			if (Engine::Audio::GetInstance())
-				Engine::Audio::GetInstance()->Play(soundFocus_, false, seVolume_);
 		}
 	}
 
@@ -483,7 +476,7 @@ void MainScene::Update() {
 			}
 
 			float panelW = 620.0f;
-			float contentH = 1900.0f; // コンテンツ自体の高さを拡張
+			float contentH = 1930.0f; // コンテンツ自体の高さを拡張
 
 			// 右寄せで表示するためのターゲットX座標
 			float targetPanelX = Engine::WindowDX::kW - panelW;
@@ -562,14 +555,6 @@ void MainScene::Update() {
 				float relaxVal = (pRelaxDurationMinutes_ - 1.0f) / 59.0f;
 				if (handleSlider(8, panelX + 320.0f, panelY + 1260.0f, 220.0f, 15.0f, relaxVal)) {
 					pRelaxDurationMinutes_ = 1.0f + relaxVal * 59.0f;
-					sliderChanged = true;
-				}
-
-				// 音量 SE Vol
-				if (handleSlider(9, panelX + 130.0f, panelY + 1605.0f, 410.0f, 15.0f, seVolume_)) {
-					auto* audio = Engine::Audio::GetInstance();
-					if (audio)
-						audio->SetMasterSEVolume(seVolume_);
 					sliderChanged = true;
 				}
 
@@ -762,8 +747,20 @@ void MainScene::Update() {
 								handledMouse = true;
 							}
 						}
+						// Language Selection (0: JP, 1: EN)
+						else if (my >= panelY + 1735.0f && my <= panelY + 1775.0f) {
+							if (mx >= panelX + 200.0f && mx <= panelX + 290.0f) {
+								language_ = 0;
+								SaveData();
+								handledMouse = true;
+							} else if (mx >= panelX + 310.0f && mx <= panelX + 400.0f) {
+								language_ = 1;
+								SaveData();
+								handledMouse = true;
+							}
+						}
 						// Reset Window Position
-						else if (mx >= panelX + 40.0f && mx <= panelX + 520.0f && my >= panelY + 1800.0f && my <= panelY + 1845.0f) {
+						else if (mx >= panelX + 40.0f && mx <= panelX + 520.0f && my >= panelY + 1830.0f && my <= panelY + 1875.0f) {
 							HWND hwnd = dx_->GetHwnd();
 							MONITORINFO mi = {sizeof(mi)};
 							GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi);
@@ -831,7 +828,8 @@ void MainScene::Update() {
 						if (!emptyBoids.empty()) {
 							int idx = rand() % emptyBoids.size();
 							const char* healingWords[] = {"安らぎ", "静寂", "癒やし", "ゆらゆら", "ぬくもり", "希望", "優しい気持ち", "深呼吸", "光", "星屑", "まどろみ"};
-							emptyBoids[idx]->customText = healingWords[rand() % 11];
+							const char* healingWordsEn[] = {"Peace", "Silence", "Healing", "Swaying", "Warmth", "Hope", "Gentle feelings", "Deep breath", "Light", "Stardust", "Slumber"};
+							emptyBoids[idx]->customText = language_ == 1 ? healingWordsEn[rand() % 11] : healingWords[rand() % 11];
 							emptyBoids[idx]->scale = 6.5f;
 							emptyBoids[idx]->textAlpha = 0.0f;
 							emptyBoids[idx]->color = {1.0f, 0.95f, 0.9f, 0.8f};
@@ -1004,8 +1002,6 @@ void MainScene::Update() {
 					zenMode_ = !zenMode_;
 					if (zenMode_)
 						isSettingsOpen_ = false;
-					if (Engine::Audio::GetInstance())
-						Engine::Audio::GetInstance()->Play(soundZen_, false, seVolume_);
 				}
 
 				// --- IME対応の日本語入力処理 ---
@@ -1032,8 +1028,6 @@ void MainScene::Update() {
 					// 星を落とす（文字列の送信）処理
 					// IMEが変換中（g_ImeCompositionStringが空でない）の時のEnterキー（変換確定）は無視する
 					if (input->Trigger(DIK_RETURN) && !inputBuffer_.empty() && g_ImeCompositionString.empty()) {
-						if (Engine::Audio::GetInstance())
-							Engine::Audio::GetInstance()->Play(soundSend_, false, seVolume_);
 						if (!boids_.empty()) {
 							int randIdx = rand() % boids_.size();
 							boids_[randIdx].customText = inputBuffer_;
@@ -1069,23 +1063,29 @@ void MainScene::Update() {
 
 						if (containsAny({"疲れ",     "つかれ",   "ツカレ",  "tsukare", "tukare", "辛い",     "つらい", "ツライ", "tsurai",    "turai",
 						                 "しんどい", "シンドイ", "shindoi", "sindoi",  "限界",   "げんかい", "genkai", "tired",  "exhausted", "hard"})) {
-							currentAIWhisper_ = "『今日一日 本当によく頑張りましたね 今はただ 休んでください』";
+							currentAIWhisper_ = language_ == 1 ? "[ You've worked really hard today. Just rest for now. ]" : "『今日一日 本当によく頑張りましたね 今はただ 休んでください』";
 						} else if (containsAny({"ミス", "みす", "misu", "miss", "失敗", "しっぱい", "shippai", "sippai", "ダメ", "だめ", "dame", "fail"})) {
-							currentAIWhisper_ = "『その悔しさは あなたが真剣に向き合っている証拠です 大丈夫』";
+							currentAIWhisper_ = language_ == 1 ? "[ Your regret is proof of your sincerity. It's going to be okay. ]" : "『その悔しさは あなたが真剣に向き合っている証拠です 大丈夫』";
 						} else if (containsAny({"悲し", "かなし", "kanashi", "kanasi", "不安", "ふあん", "フアン", "huan", "fuan", "怖い", "こわい", "kowai", "sad", "anxious", "scared", "fear"})) {
-							currentAIWhisper_ = "『無理にポジティブにならなくていいんです ここに感情を置いていってください』";
+							currentAIWhisper_ = language_ == 1 ? "[ You don't have to force yourself to be positive. Just leave your emotions here. ]"
+							                                   : "『無理にポジティブにならなくていいんです ここに感情を置いていってください』";
 						} else if (containsAny({"怒", "おこ", "いかり", "ikari", "oko", "イライラ", "いらいら", "iraira", "むかつく", "ムカツク", "mukatsuku", "mukakuku", "angry", "mad", "hate"})) {
-							currentAIWhisper_ = "『感情の波はいずれ凪になります 今はここで ゆっくりと深呼吸を』";
+							currentAIWhisper_ = language_ == 1 ? "[ The waves of emotion will calm down eventually. Take a slow, deep breath here. ]"
+							                                   : "『感情の波はいずれ凪になります 今はここで ゆっくりと深呼吸を』";
 						} else if (containsAny({"嬉し", "うれし", "ureshi", "uresi", "楽し", "たのし", "tanoshi", "tanosi", "最高", "さいこう", "saikou", "happy", "fun", "great", "glad", "joy"})) {
-							currentAIWhisper_ = "『あなたの温かい感情が この場所をさらに明るくしてくれました』";
+							currentAIWhisper_ = language_ == 1 ? "[ Your warm feelings have made this place even brighter. ]" : "『あなたの温かい感情が この場所をさらに明るくしてくれました』";
 						} else if (containsAny({"眠い", "ねむい", "nemui", "寝たい", "ねたい", "netai", "sleepy", "sleep"})) {
-							currentAIWhisper_ = "『星たちの瞬きを見ながら ゆっくりとまぶたを閉じてみませんか？』";
+							currentAIWhisper_ =
+							    language_ == 1 ? "[ Why not slowly close your eyes while watching the twinkling stars? ]" : "『星たちの瞬きを見ながら ゆっくりとまぶたを閉じてみませんか？』";
 						} else {
 							// どれにも当てはまらない場合は名言からランダム
-							const char* whispers[] = {
+							const char* whispersJp[] = {
 							    "『ここは あなたの心を休める場所です』", "『あなたが落とした言葉は やがて星になって輝きます』", "『静かな時間が あなたの心に平穏をもたらしますように』",
 							    "『焦る必要はありません 自分のペースで息をしてください』", "『空を見上げる余裕が 少しだけ心を軽くしてくれます』"};
-							currentAIWhisper_ = whispers[rand() % 5];
+							const char* whispersEn[] = {
+							    "[ This is a place for your heart to rest. ]", "[ The words you drop will eventually shine as stars. ]", "[ May this quiet time bring peace to your mind. ]",
+							    "[ No need to rush. Breathe at your own pace. ]", "[ Taking a moment to look up at the sky will lighten your heart a little. ]"};
+							currentAIWhisper_ = language_ == 1 ? whispersEn[rand() % 5] : whispersJp[rand() % 5];
 						}
 
 						// 入力した気持ちをログに保存（最大50件）
@@ -1133,7 +1133,8 @@ void MainScene::Update() {
 		if (textCount < 15 && !emptyBoids.empty()) {
 			int idx = rand() % emptyBoids.size();
 			const char* healingWords[] = {"安らぎ", "静寂", "癒やし", "ゆらゆら", "ぬくもり", "希望", "優しい気持ち", "深呼吸", "星屑", "光"};
-			emptyBoids[idx]->customText = healingWords[rand() % 10];
+			const char* healingWordsEn[] = {"Peace", "Silence", "Healing", "Swaying", "Warmth", "Hope", "Gentle feelings", "Deep breath", "Stardust", "Light"};
+			emptyBoids[idx]->customText = language_ == 1 ? healingWordsEn[rand() % 10] : healingWords[rand() % 10];
 			emptyBoids[idx]->scale = 6.5f;     // 少し大きめに設定して目立たせる
 			emptyBoids[idx]->textAlpha = 0.0f; // フェードイン開始
 
@@ -1959,10 +1960,6 @@ void MainScene::Update() {
 					b.velocity.x -= nx * 20.0f;
 					b.velocity.y -= ny * 20.0f;
 					b.scale = 6.0f; // ぶつかると一瞬大きくなる
-					if (Engine::Audio::GetInstance()) {
-						// ファイル自体で音量を調整済みのためseVolume_で再生
-						Engine::Audio::GetInstance()->Play(soundHit_, false, seVolume_);
-					}
 				}
 			}
 		}
@@ -3011,14 +3008,19 @@ void MainScene::Draw() {
 			float rightMarginX = Engine::WindowDX::kW - 50.0f;
 			float bottomY = Engine::WindowDX::kH - 180.0f;
 
-			float titleW = renderer_->MeasureTextWidth("星からのささやき：", 0.5f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-			renderer_->DrawString("星からのささやき：", rightMarginX - titleW, bottomY, 0.5f, {0.7f, 0.7f, 0.8f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			float titleW = renderer_->MeasureTextWidth(language_ == 1 ? "Whisper from the stars:" : "星からのささやき：", 0.5f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString(
+			    language_ == 1 ? "Whisper from the stars:" : "星からのささやき：", rightMarginX - titleW, bottomY, 0.5f, {0.7f, 0.7f, 0.8f, 1.0f},
+			    "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
 			float textW = renderer_->MeasureTextWidth(currentAIWhisper_.c_str(), 0.4f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(currentAIWhisper_.c_str(), rightMarginX - textW, bottomY + 45.0f, 0.4f, {0.7f, 0.7f, 0.8f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
-			float subW = renderer_->MeasureTextWidth("※右クリックで小さな姿に戻ります", 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-			renderer_->DrawString("※右クリックで小さな姿に戻ります", rightMarginX - subW, bottomY + 95.0f, 0.35f, {0.6f, 0.6f, 0.7f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			float subW =
+			    renderer_->MeasureTextWidth(language_ == 1 ? "* Right-click to return to small form" : "※右クリックで小さな姿に戻ります", 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString(
+			    language_ == 1 ? "* Right-click to return to small form" : "※右クリックで小さな姿に戻ります", rightMarginX - subW, bottomY + 95.0f, 0.35f, {0.6f, 0.6f, 0.7f, 1.0f},
+			    "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
 			// Popcorn All UI Button
 			if (interactionMode_ == 3) {
@@ -3695,7 +3697,7 @@ void MainScene::DrawUI() {
 			nPrev.color = Engine::Vector4{customNodeColor_.x, customNodeColor_.y, customNodeColor_.z, 1.0f};
 			nPrev.layer = 102;
 			renderer_->DrawSprite(whiteTex_, nPrev);
-			renderer_->DrawString("ノードカラー", ncX + 10.0f, ncY + 152.0f, 0.28f, {0.5f, 0.55f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString(language_ == 1 ? "Node Color" : "ノードカラー", ncX + 10.0f, ncY + 152.0f, 0.28f, {0.5f, 0.55f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
 			snprintf(rStr, sizeof(rStr), "%d", (int)(customNodeColor_.x * 255));
 			snprintf(gStr, sizeof(gStr), "%d", (int)(customNodeColor_.y * 255));
@@ -3718,7 +3720,7 @@ void MainScene::DrawUI() {
 			tPrev.color = Engine::Vector4{customTextColor_.x, customTextColor_.y, customTextColor_.z, 1.0f};
 			tPrev.layer = 102;
 			renderer_->DrawSprite(whiteTex_, tPrev);
-			renderer_->DrawString("テキストカラー", tcX + 10.0f, tcY + 152.0f, 0.28f, {0.5f, 0.55f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			renderer_->DrawString(language_ == 1 ? "Text Color" : "テキストカラー", tcX + 10.0f, tcY + 152.0f, 0.28f, {0.5f, 0.55f, 0.6f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
 			snprintf(rStr, sizeof(rStr), "%d", (int)(customTextColor_.x * 255));
 			snprintf(gStr, sizeof(gStr), "%d", (int)(customTextColor_.y * 255));
@@ -3763,9 +3765,9 @@ void MainScene::DrawUI() {
 			renderer_->DrawSprite(softCircleTex_ ? softCircleTex_ : whiteTex_, fbh);
 
 			// --- 環境設定 (画質と音量) ---
-			drawSectionHeader(panelX + 20.0f, panelY + 1440.0f, "GRAPHICS & SOUND SETTINGS");
+			drawSectionHeader(panelX + 20.0f, panelY + 1440.0f, "GRAPHICS SETTINGS");
 			float gsY = panelY + 1485.0f;
-			drawCard(panelX + 20.0f, gsY, 560.0f, 170.0f);
+			drawCard(panelX + 20.0f, gsY, 560.0f, 110.0f);
 
 			// Graphics Quality
 			renderer_->DrawString("Graphics Quality", panelX + 40.0f, gsY + 15.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
@@ -3783,14 +3785,28 @@ void MainScene::DrawUI() {
 				    "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			}
 
-			// Audio Volume Sliders
-			drawSlider(panelX + 130.0f, gsY + 120.0f, 410.0f, "SE Vol", seVolume_, {0.3f, 0.7f, 0.9f, 1.0f});
-
 			// --- ディスプレイ設定 ---
-			drawSectionHeader(panelX + 20.0f, panelY + 1735.0f, "Display settings");
+			drawSectionHeader(panelX + 20.0f, panelY + 1675.0f, language_ == 1 ? "Display & Language Settings" : "Display settings");
+
+			// Language Selection Card
+			drawCard(panelX + 20.0f, panelY + 1720.0f, 560.0f, 80.0f);
+			renderer_->DrawString("Language", panelX + 40.0f, panelY + 1735.0f, 0.35f, {0.9f, 0.9f, 0.9f, 1.0f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			const char* langNames[] = {"日本語", "English"};
+			for (int i = 0; i < 2; ++i) {
+				float lx = panelX + 200.0f + i * 110.0f;
+				float ly = panelY + 1735.0f;
+				bool isSel = (language_ == i);
+				bool isHover = (mx >= lx && mx <= lx + 90.0f && my >= ly && my <= ly + 40.0f);
+				Engine::Vector4 btnCol = isSel ? Engine::Vector4{0.2f, 0.5f, 0.9f, 1.0f} : (isHover ? Engine::Vector4{0.2f, 0.2f, 0.25f, 1.0f} : Engine::Vector4{0.15f, 0.15f, 0.18f, 1.0f});
+				DrawRoundedRectUI(lx, ly, 90.0f, 40.0f, 8.0f, btnCol, 102);
+				float ltw = renderer_->MeasureTextWidth(langNames[i], 0.3f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+				renderer_->DrawString(
+				    langNames[i], lx + 45.0f - ltw / 2.0f, ly + 12.0f, 0.3f, isSel ? Engine::Vector4{1, 1, 1, 1} : Engine::Vector4{0.7f, 0.7f, 0.75f, 1},
+				    "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+			}
 
 			// Window Reset Button Card
-			float dsY = panelY + 1780.0f;
+			float dsY = panelY + 1810.0f;
 			drawCard(panelX + 20.0f, dsY, 560.0f, 85.0f);
 
 			float rx = panelX + 40.0f;
@@ -3809,7 +3825,7 @@ void MainScene::DrawUI() {
 			std::string displayStr = inputBuffer_ + g_ImeCompositionString;
 			if (displayStr.empty()) {
 				// プレースホルダー
-				const char* hint = "Type your feelings and press Enter...";
+				const char* hint = language_ == 1 ? "Type your feelings and press Enter..." : "気持ちを入力してEnterキーを押してください...";
 				float hintW = renderer_->MeasureTextWidth(hint, 0.45f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 				// 文字位置を少し下げる（cy - 25.0f から cy - 10.0f に変更）
 				renderer_->DrawString(hint, cx - hintW / 2.0f, cy - 10.0f, 0.45f, {0.6f, 0.6f, 0.6f, 0.8f}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
@@ -4006,7 +4022,8 @@ void MainScene::DrawUI() {
 
 		DrawRoundedRectUI(updX, updY, updW, updH, 12.0f, {0.1f, 0.12f, 0.15f, 0.95f}, 200);
 
-		renderer_->DrawString("新しいバージョンがあります！", updX + 20.0f, updY + 15.0f, 0.4f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+		const char* updTitle = language_ == 1 ? "New version available!" : "新しいバージョンがあります！";
+		renderer_->DrawString(updTitle, updX + 20.0f, updY + 15.0f, 0.4f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 		std::string verMsg = std::string(APP_VERSION) + " -> " + latestVersion_;
 		renderer_->DrawString(verMsg.c_str(), updX + 20.0f, updY + 45.0f, 0.3f, {0.7f, 0.7f, 0.7f, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
@@ -4019,11 +4036,12 @@ void MainScene::DrawUI() {
 
 		DrawRoundedRectUI(btnX, btnY, btnW, btnH, 8.0f, isHover ? Engine::Vector4{0.2f, 0.6f, 0.9f, 1.0f} : Engine::Vector4{0.15f, 0.4f, 0.7f, 1.0f}, 201);
 
-		float tw = renderer_->MeasureTextWidth("更新する", 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
-		renderer_->DrawString("更新する", btnX + btnW / 2.0f - tw / 2.0f, btnY + 5.0f, 0.35f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+		const char* btnLabel = language_ == 1 ? "Update" : "更新する";
+		float tw = renderer_->MeasureTextWidth(btnLabel, 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
+		renderer_->DrawString(btnLabel, btnX + btnW / 2.0f - tw / 2.0f, btnY + 5.0f, 0.35f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
 		if (isHover && input->IsMouseTrigger(0)) {
-			std::string cmdArgs = updateDownloadUrl_;
+			std::string cmdArgs = updateDownloadUrl_ + " " + std::to_string(language_);
 			ShellExecuteA(NULL, "open", "Updater.exe", cmdArgs.c_str(), NULL, SW_SHOW);
 			PostMessage(dx_->GetHwnd(), WM_CLOSE, 0, 0); // 安全に終了
 		}
@@ -4075,11 +4093,11 @@ void MainScene::DrawUI() {
 				SaveData();
 			}
 
-			const char* title = "休憩時間です";
+			const char* title = language_ == 1 ? "Break Time" : "休憩時間です";
 			float tw = renderer_->MeasureTextWidth(title, 0.5f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(title, 125.0f - tw / 2.0f, 90.0f, 0.5f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
-			const char* sub = "少し目を休めましょう";
+			const char* sub = language_ == 1 ? "Let's rest your eyes a bit" : "少し目を休めましょう";
 			float sw = renderer_->MeasureTextWidth(sub, 0.35f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(sub, 125.0f - sw / 2.0f, 130.0f, 0.35f, {0.7f, 0.7f, 0.7f, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
@@ -4096,16 +4114,16 @@ void MainScene::DrawUI() {
 			bg.layer = 140;
 			renderer_->DrawSprite(whiteTex_, bg);
 
-			const char* title = "強制休憩モード";
+			const char* title = language_ == 1 ? "Forced Break Mode" : "強制休憩モード";
 			float tw = renderer_->MeasureTextWidth(title, 1.2f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(title, Engine::WindowDX::kW / 2.0f - tw / 2.0f, Engine::WindowDX::kH / 2.0f - 140.0f, 1.2f, {1, 1, 1, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
-			const char* sub = "作業時間が終了しました　画面から目を離し　リフレッシュしてください";
+			const char* sub = language_ == 1 ? "Work time is over. Look away from the screen and refresh." : "作業時間が終了しました　画面から目を離し　リフレッシュしてください";
 			float sw = renderer_->MeasureTextWidth(sub, 0.45f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(
 			    sub, Engine::WindowDX::kW / 2.0f - sw / 2.0f, Engine::WindowDX::kH / 2.0f - 70.0f, 0.45f, {0.7f, 0.7f, 0.8f, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 
-			const char* sub2 = "ゆっくりと深呼吸をして　心と体を休めましょう";
+			const char* sub2 = language_ == 1 ? "Take a slow deep breath and rest your mind and body." : "ゆっくりと深呼吸をして　心と体を休めましょう";
 			float sw2 = renderer_->MeasureTextWidth(sub2, 0.45f, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
 			renderer_->DrawString(
 			    sub2, Engine::WindowDX::kW / 2.0f - sw2 / 2.0f, Engine::WindowDX::kH / 2.0f - 30.0f, 0.45f, {0.7f, 0.7f, 0.8f, 1}, "Resources/Textures/fonts/Huninn/Huninn-Regular.ttf");
@@ -4146,8 +4164,18 @@ std::string GetExeDirectory() {
 	return "";
 }
 
+std::string GetSaveDirectory() {
+	char path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, path))) {
+		std::string dir = std::string(path) + "\\Sae\\";
+		CreateDirectoryA(dir.c_str(), NULL);
+		return dir;
+	}
+	return GetExeDirectory();
+}
+
 void MainScene::LoadData() {
-	std::string savePath = GetExeDirectory() + "tranquil_save.json";
+	std::string savePath = GetSaveDirectory() + "tranquil_save.json";
 	std::ifstream f(savePath);
 	if (!f.is_open())
 		return;
@@ -4173,6 +4201,8 @@ void MainScene::LoadData() {
 			pRelaxDurationMinutes_ = j["relaxDuration"].get<float>();
 		if (j.contains("forcedBreak"))
 			isForcedBreakMode_ = j["forcedBreak"].get<bool>();
+		if (j.contains("language"))
+			language_ = j["language"].get<int>();
 
 		if (j.contains("graphicsQuality")) {
 			graphicsQuality_ = j["graphicsQuality"].get<int>();
@@ -4182,15 +4212,9 @@ void MainScene::LoadData() {
 
 		if (j.contains("bgmVolume")) {
 			bgmVolume_ = j["bgmVolume"].get<float>();
-			auto* audio = Engine::Audio::GetInstance();
-			if (audio)
-				audio->SetMasterBGMVolume(bgmVolume_);
 		}
 		if (j.contains("seVolume")) {
 			seVolume_ = j["seVolume"].get<float>();
-			auto* audio = Engine::Audio::GetInstance();
-			if (audio)
-				audio->SetMasterSEVolume(seVolume_);
 		}
 
 		if (j.contains("useCustomNodeColor"))
@@ -4245,11 +4269,12 @@ void MainScene::SaveData() {
 		j["workDuration"] = pWorkDurationMinutes_;
 		j["relaxDuration"] = pRelaxDurationMinutes_;
 		j["forcedBreak"] = isForcedBreakMode_;
+		j["language"] = language_;
 		j["graphicsQuality"] = graphicsQuality_;
 		j["bgmVolume"] = bgmVolume_;
 		j["seVolume"] = seVolume_;
 
-		std::string savePath = GetExeDirectory() + "tranquil_save.json";
+		std::string savePath = GetSaveDirectory() + "tranquil_save.json";
 		std::ofstream f(savePath);
 		if (f.is_open()) {
 			f << j.dump(4);
